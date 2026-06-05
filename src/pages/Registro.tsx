@@ -189,7 +189,7 @@ export default function Registro() {
           <>
             <section className="registro-hero" style={{ backgroundColor: '#0f0f12', padding: '120px 20px 50px' }}>
               <div className="max-w-4xl mx-auto">
-                <span style={{ backgroundColor: '#1548a0', color: '#fff', padding: '5px 12px', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                <span style={{ backgroundColor: '#022067', color: '#fff', padding: '5px 12px', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
                   NUEVO DISTRIBUIDOR
                 </span>
                 <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', fontWeight: 900, color: '#fff', lineHeight: 1.1, marginTop: '16px' }}>
@@ -267,11 +267,11 @@ export default function Registro() {
                           {(['personal_natural', 'instalador', 'distribuidor_acs'] as const).map(opt => (
                             <label key={opt}
                               className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all"
-                              style={{ borderColor: form.userType === opt ? '#1548a0' : '#e2e8f0', backgroundColor: form.userType === opt ? '#eef2ff' : '#fff' }}
+                              style={{ borderColor: form.userType === opt ? '#022067' : '#e2e8f0', backgroundColor: form.userType === opt ? '#eef2ff' : '#fff' }}
                               onClick={() => update('userType', opt)}>
                               <div className="w-5 h-5 rounded-full border-2 mt-0.5 flex-shrink-0 flex items-center justify-center"
-                                style={{ borderColor: form.userType === opt ? '#1548a0' : '#cbd5e1' }}>
-                                {form.userType === opt && <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#1548a0' }} />}
+                                style={{ borderColor: form.userType === opt ? '#022067' : '#cbd5e1' }}>
+                                {form.userType === opt && <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#022067' }} />}
                               </div>
                               <div>
                                 <p className="text-sm font-medium" style={{ color: '#1a1a2e' }}>{USER_TYPE_LABELS[opt]}</p>
@@ -312,7 +312,7 @@ export default function Registro() {
                       <div>
                         <label className="flex items-start gap-3 cursor-pointer">
                           <div className="w-5 h-5 rounded border-2 mt-0.5 flex-shrink-0 flex items-center justify-center transition-all"
-                            style={{ borderColor: form.acceptTerms ? '#1548a0' : errors.acceptTerms ? '#e63946' : '#cbd5e1', backgroundColor: form.acceptTerms ? '#1548a0' : 'transparent' }}
+                            style={{ borderColor: form.acceptTerms ? '#022067' : errors.acceptTerms ? '#e63946' : '#cbd5e1', backgroundColor: form.acceptTerms ? '#022067' : 'transparent' }}
                             onClick={() => update('acceptTerms', !form.acceptTerms)}>
                             {form.acceptTerms && <Check size={12} style={{ color: '#fff' }} />}
                           </div>
@@ -343,7 +343,7 @@ export default function Registro() {
                         ))}
                       </div>
                       <div className="flex items-center gap-3 p-4 rounded-lg bg-white border border-slate-200">
-                        <Shield size={18} style={{ color: '#1548a0', flexShrink: 0 }} />
+                        <Shield size={18} style={{ color: '#022067', flexShrink: 0 }} />
                         <p className="text-xs" style={{ color: '#64748b' }}><span className="font-semibold">Sin compromiso.</span> Si en 30 días no vendes, te devolvemos el 100%.</p>
                       </div>
                     </div>
@@ -360,7 +360,7 @@ export default function Registro() {
         {step === 'sending_code' && (
           <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0f0f12' }}>
             <div className="text-center">
-              <Loader2 size={48} className="animate-spin mx-auto mb-4" style={{ color: '#1548a0' }} />
+              <Loader2 size={48} className="animate-spin mx-auto mb-4" style={{ color: '#022067' }} />
               <h2 className="text-xl font-bold text-white uppercase">Enviando código...</h2>
               <p className="mt-2" style={{ color: '#94a3b8' }}>Preparando tu verificación</p>
             </div>
@@ -375,11 +375,11 @@ export default function Registro() {
             <div className="w-full max-w-md">
               <div className="text-center mb-6">
                 <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-4" style={{ backgroundColor: '#eef2ff' }}>
-                  <Mail size={32} style={{ color: '#1548a0' }} />
+                  <Mail size={32} style={{ color: '#022067' }} />
                 </div>
                 <h2 className="text-2xl font-bold text-white uppercase">Verifica tu correo</h2>
                 <p className="mt-2" style={{ color: '#94a3b8' }}>Hemos enviado un código a</p>
-                <p className="mt-1 font-semibold" style={{ color: '#1548a0' }}>{form.email}</p>
+                <p className="mt-1 font-semibold" style={{ color: '#022067' }}>{form.email}</p>
               </div>
 
               <div className="bg-white rounded-lg p-6 shadow-xl">
@@ -399,20 +399,20 @@ export default function Registro() {
                     onChange={e => { setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setCodeError(''); }}
                     onKeyDown={e => { if (e.key === 'Enter') handleVerifyCode(); }}
                     placeholder="------"
-                    className="w-full mt-2 border border-slate-200 rounded-md px-4 py-4 text-center text-3xl font-bold tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-[#1548a0]"
+                    className="w-full mt-2 border border-slate-200 rounded-md px-4 py-4 text-center text-3xl font-bold tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-[#022067]"
                     style={{ fontFamily: 'monospace' }}
                     autoFocus
                   />
                   <p className="text-xs text-slate-400 mt-2 text-center">Ingresa los 6 dígitos que recibiste</p>
                 </div>
 
-                <Button className="w-full mt-5 font-bold uppercase" style={{ backgroundColor: verificationCode.length === 6 ? '#1548a0' : '#94a3b8', color: '#fff', padding: '14px' }}
+                <Button className="w-full mt-5 font-bold uppercase" style={{ backgroundColor: verificationCode.length === 6 ? '#022067' : '#94a3b8', color: '#fff', padding: '14px' }}
                   onClick={handleVerifyCode} disabled={verificationCode.length !== 6}>
                   VERIFICAR CÓDIGO
                 </Button>
 
                 <div className="text-center mt-4 space-y-2">
-                  <button type="button" className="text-sm text-slate-500 hover:text-[#1548a0] underline" onClick={handleResendCode}>¿No recibiste el código? Reenviar</button>
+                  <button type="button" className="text-sm text-slate-500 hover:text-[#022067] underline" onClick={handleResendCode}>¿No recibiste el código? Reenviar</button>
                   <p className="text-xs text-slate-400">Revisa también tu carpeta de spam</p>
                 </div>
               </div>
@@ -430,7 +430,7 @@ export default function Registro() {
         {step === 'creating' && (
           <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0f0f12' }}>
             <div className="text-center">
-              <Loader2 size={48} className="animate-spin mx-auto mb-4" style={{ color: '#1548a0' }} />
+              <Loader2 size={48} className="animate-spin mx-auto mb-4" style={{ color: '#022067' }} />
               <h2 className="text-xl font-bold text-white uppercase">Creando tu cuenta...</h2>
               <p className="mt-2" style={{ color: '#94a3b8' }}>Esto tomará solo unos segundos</p>
             </div>
@@ -449,7 +449,7 @@ export default function Registro() {
               <h2 className="text-2xl font-bold uppercase" style={{ color: '#2a9d8f' }}>¡Cuenta verificada!</h2>
               <p className="mt-4" style={{ color: '#94a3b8' }}>Tu email ha sido confirmado exitosamente.</p>
               <p className="mt-2" style={{ color: '#64748b' }}>Redirigiendo al catálogo de productos...</p>
-              <Loader2 size={24} className="animate-spin mx-auto mt-6" style={{ color: '#1548a0' }} />
+              <Loader2 size={24} className="animate-spin mx-auto mt-6" style={{ color: '#022067' }} />
             </div>
           </section>
         )}

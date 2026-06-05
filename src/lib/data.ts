@@ -354,7 +354,7 @@ export const featureCards: FeatureCard[] = [
   {
     icon: 'Headphones',
     iconBg: 'rgba(21,72,160,0.1)',
-    iconColor: '#1548a0',
+    iconColor: '#022067',
     title: 'SOPORTE INTEGRAL',
     description: 'Equipo de ingenieria a tu disposicion: seleccion de equipos, diseno de instalacion, calculos de ahorro y atencion post-venta.',
   },

@@ -39,7 +39,7 @@ const benefitCards = [
   {
     icon: Headphones,
     iconBg: 'rgba(21,72,160,0.1)',
-    iconColor: '#1548a0',
+    iconColor: '#022067',
     title: 'SOPORTE TÉCNICO DEDICADO',
     description: 'Línea directa con ingenieros especializados. Respuesta en menos de 24 horas. Soporte en instalación y post-venta.',
     highlight: 'Canal WhatsApp directo',
@@ -63,7 +63,7 @@ const benefitCards = [
   {
     icon: MapPin,
     iconBg: 'rgba(21,72,160,0.1)',
-    iconColor: '#1548a0',
+    iconColor: '#022067',
     title: 'LEADS DE TU ZONA',
     description: 'Derivamos consultas de tu región directamente a ti. Acceso a portal de oportunidades y lista de proyectos en desarrollo.',
     highlight: 'Oportunidades certificadas',
@@ -426,7 +426,7 @@ export default function Distribuidor() {
                       cursor: 'default',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#1548a0';
+                      e.currentTarget.style.borderColor = '#022067';
                       e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.1)';
                       e.currentTarget.style.transform = 'translateY(-4px)';
                     }}
@@ -535,7 +535,7 @@ export default function Distribuidor() {
                           width: '3rem',
                           height: '3rem',
                           borderRadius: '50%',
-                          backgroundColor: '#1548a0',
+                          backgroundColor: '#022067',
                           color: '#ffffff',
                           fontSize: '1.2rem',
                           fontWeight: 900,
@@ -770,7 +770,7 @@ export default function Distribuidor() {
                           padding: '12px 16px',
                           outline: 'none',
                         }}
-                        onFocus={(e) => { if (!errors.nombre) e.currentTarget.style.borderColor = '#1548a0'; }}
+                        onFocus={(e) => { if (!errors.nombre) e.currentTarget.style.borderColor = '#022067'; }}
                         onBlur={(e) => { if (!errors.nombre) e.currentTarget.style.borderColor = '#e2e8f0'; }}
                       />
                     </div>
@@ -793,7 +793,7 @@ export default function Distribuidor() {
                           padding: '12px 16px',
                           outline: 'none',
                         }}
-                        onFocus={(e) => { if (!errors.empresa) e.currentTarget.style.borderColor = '#1548a0'; }}
+                        onFocus={(e) => { if (!errors.empresa) e.currentTarget.style.borderColor = '#022067'; }}
                         onBlur={(e) => { if (!errors.empresa) e.currentTarget.style.borderColor = '#e2e8f0'; }}
                       />
                     </div>
@@ -820,7 +820,7 @@ export default function Distribuidor() {
                           padding: '12px 16px',
                           outline: 'none',
                         }}
-                        onFocus={(e) => { if (!errors.email) e.currentTarget.style.borderColor = '#1548a0'; }}
+                        onFocus={(e) => { if (!errors.email) e.currentTarget.style.borderColor = '#022067'; }}
                         onBlur={(e) => { if (!errors.email) e.currentTarget.style.borderColor = '#e2e8f0'; }}
                       />
                     </div>
@@ -843,7 +843,7 @@ export default function Distribuidor() {
                           padding: '12px 16px',
                           outline: 'none',
                         }}
-                        onFocus={(e) => { if (!errors.telefono) e.currentTarget.style.borderColor = '#1548a0'; }}
+                        onFocus={(e) => { if (!errors.telefono) e.currentTarget.style.borderColor = '#022067'; }}
                         onBlur={(e) => { if (!errors.telefono) e.currentTarget.style.borderColor = '#e2e8f0'; }}
                       />
                     </div>
@@ -899,7 +899,7 @@ export default function Distribuidor() {
                         padding: '12px 16px',
                         outline: 'none',
                       }}
-                      onFocus={(e) => { if (!errors.ciudad) e.currentTarget.style.borderColor = '#1548a0'; }}
+                      onFocus={(e) => { if (!errors.ciudad) e.currentTarget.style.borderColor = '#022067'; }}
                       onBlur={(e) => { if (!errors.ciudad) e.currentTarget.style.borderColor = '#e2e8f0'; }}
                     />
                   </div>

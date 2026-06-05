@@ -74,7 +74,7 @@ function CategoryFilterBar({
             ref={indicatorRef}
             className="absolute top-0 h-full rounded"
             style={{
-              backgroundColor: '#1548a0',
+              backgroundColor: '#022067',
               height: 'calc(100% - 2rem)',
               marginTop: '1rem',
               zIndex: 0,
@@ -98,7 +98,7 @@ function CategoryFilterBar({
               onMouseEnter={(e) => {
                 if (activeCategory !== cat.key) {
                   e.currentTarget.style.backgroundColor = 'rgba(21,72,160,0.08)';
-                  e.currentTarget.style.color = '#1548a0';
+                  e.currentTarget.style.color = '#022067';
                 }
               }}
               onMouseLeave={(e) => {
@@ -256,7 +256,7 @@ function ProductCard({ product, cardRef, userRole }: { product: Product; cardRef
             <div>
               <span
                 className="font-bold"
-                style={{ fontSize: '0.9rem', color: '#1548a0' }}
+                style={{ fontSize: '0.9rem', color: '#022067' }}
               >
                 ${product.price.toLocaleString('es-ES')} USD
               </span>
@@ -601,7 +601,7 @@ export default function Productos() {
               className="inline-flex items-center gap-2 font-semibold uppercase text-white transition-all duration-200 hover:brightness-110"
               style={{
                 fontSize: '0.875rem',
-                backgroundColor: '#1548a0',
+                backgroundColor: '#022067',
                 padding: '14px 28px',
                 borderRadius: '4px',
               }}
@@ -614,8 +614,8 @@ export default function Productos() {
               className="inline-flex items-center gap-2 font-semibold uppercase transition-all duration-200 hover:bg-[rgba(21,72,160,0.05)]"
               style={{
                 fontSize: '0.875rem',
-                color: '#1548a0',
-                border: '1px solid #1548a0',
+                color: '#022067',
+                border: '1px solid #022067',
                 padding: '14px 28px',
                 borderRadius: '4px',
               }}

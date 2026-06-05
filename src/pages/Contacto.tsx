@@ -306,7 +306,7 @@ export default function Contacto() {
   };
 
   const inputFocusStyle = {
-    borderColor: '#1548a0',
+    borderColor: '#022067',
     boxShadow: '0 0 0 3px rgba(21,72,160,0.1)',
   };
 
@@ -338,7 +338,7 @@ export default function Contacto() {
         <section
           className="relative"
           style={{
-            background: 'linear-gradient(135deg, #1548a0 0%, #2a9d8f 100%)',
+            background: 'linear-gradient(135deg, #022067 0%, #2a9d8f 100%)',
             padding: 'clamp(7rem, 12vw, 10rem) 0 clamp(3rem, 6vw, 5rem)',
           }}
         >
@@ -535,7 +535,7 @@ export default function Contacto() {
                     borderRadius: '8px',
                   }}
                 >
-                  <Phone size={32} style={{ color: '#1548a0' }} />
+                  <Phone size={32} style={{ color: '#022067' }} />
                 </div>
                 <h3
                   className="uppercase"
@@ -567,7 +567,7 @@ export default function Contacto() {
                     fontFamily: 'Inter, sans-serif',
                     fontWeight: 700,
                     fontSize: '1.3rem',
-                    color: '#1548a0',
+                    color: '#022067',
                     marginTop: '1.5rem',
                   }}
                 >
@@ -661,7 +661,7 @@ export default function Contacto() {
                         fontFamily: 'Inter, sans-serif',
                         fontWeight: 500,
                         fontSize: '0.85rem',
-                        color: '#1548a0',
+                        color: '#022067',
                         textDecoration: 'none',
                         transition: 'color 200ms ease',
                       }}
@@ -775,7 +775,7 @@ export default function Contacto() {
                       fontFamily: 'Inter, sans-serif',
                       fontWeight: 600,
                       fontSize: '0.85rem',
-                      color: '#1548a0',
+                      color: '#022067',
                       textDecoration: 'underline',
                       background: 'none',
                       border: 'none',
@@ -1182,7 +1182,7 @@ export default function Contacto() {
                       fontFamily: 'Inter, sans-serif',
                       fontWeight: 500,
                       fontSize: '0.85rem',
-                      color: '#1548a0',
+                      color: '#022067',
                       marginTop: '0.75rem',
                       display: 'block',
                       textDecoration: 'none',

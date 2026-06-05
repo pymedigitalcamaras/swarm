@@ -125,7 +125,7 @@ const caseStudies: CaseStudy[] = [
     product: 'InduHeat 50kW',
     metric: '58%',
     metricLabel: 'AHORRO ENERGÉTICO',
-    metricColor: '#1548a0',
+    metricColor: '#022067',
     description: 'Climatización de nave industrial de 2,400m² con sistema de cascada de alta potencia.',
     longDescription: 'Sistema de climatización para centro logístico de 2,400m² utilizando 3 equipos InduHeat 50kW en cascada. Control zonificado con recuperación de calor de máquinas.',
     details: [
@@ -179,7 +179,7 @@ const caseStudies: CaseStudy[] = [
     product: 'AquaPro R32 12kW',
     metric: '3.1',
     metricLabel: 'AÑOS ROI',
-    metricColor: '#1548a0',
+    metricColor: '#022067',
     description: 'Climatización de oficinas de 1,800m² con sistema aerotérmico y ACS para 120 empleados.',
     longDescription: 'Instalación de sistema aerotérmico para edificio corporativo de 8 pisos. Sistema integrado de climatización y producción de ACS para 120 empleados.',
     details: [
@@ -392,7 +392,7 @@ export default function Casos() {
                     borderRadius: '4px',
                     border: 'none',
                     cursor: 'pointer',
-                    backgroundColor: activeCategory === cat ? '#1548a0' : 'rgba(255,255,255,0.1)',
+                    backgroundColor: activeCategory === cat ? '#022067' : 'rgba(255,255,255,0.1)',
                     color: '#ffffff',
                   }}
                   onMouseEnter={(e) => {
@@ -475,7 +475,7 @@ export default function Casos() {
                         style={{
                           fontSize: '2rem',
                           fontWeight: 900,
-                          color: stat.label === 'AHORRO ENERGÉTICO' ? '#2a9d8f' : stat.label === 'DEPARTAMENTOS' ? '#1548a0' : '#e63946',
+                          color: stat.label === 'AHORRO ENERGÉTICO' ? '#2a9d8f' : stat.label === 'DEPARTAMENTOS' ? '#022067' : '#e63946',
                         }}
                       >
                         {stat.value}
@@ -677,7 +677,7 @@ export default function Casos() {
         <section
           className="casos-stats-bar"
           style={{
-            background: 'linear-gradient(135deg, #1548a0 0%, #2a9d8f 100%)',
+            background: 'linear-gradient(135deg, #022067 0%, #2a9d8f 100%)',
             paddingTop: '5rem',
             paddingBottom: '5rem',
           }}
@@ -769,7 +769,7 @@ export default function Casos() {
                     fontWeight: 600,
                     letterSpacing: '0.08em',
                     color: '#ffffff',
-                    backgroundColor: '#1548a0',
+                    backgroundColor: '#022067',
                     padding: '0.35rem 0.75rem',
                     borderRadius: '4px',
                   }}
@@ -837,7 +837,7 @@ export default function Casos() {
                     className="uppercase flex items-center"
                     style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1a1a2e', letterSpacing: '0.08em', marginBottom: '1rem' }}
                   >
-                    <Thermometer size={16} style={{ marginRight: '0.5rem', color: '#1548a0' }} />
+                    <Thermometer size={16} style={{ marginRight: '0.5rem', color: '#022067' }} />
                     DETALLES TÉCNICOS
                   </h4>
                   <div className="flex flex-col" style={{ gap: '0.75rem' }}>
@@ -856,7 +856,7 @@ export default function Casos() {
                     className="uppercase flex items-center"
                     style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1a1a2e', letterSpacing: '0.08em', marginBottom: '1rem' }}
                   >
-                    <Calendar size={16} style={{ marginRight: '0.5rem', color: '#1548a0' }} />
+                    <Calendar size={16} style={{ marginRight: '0.5rem', color: '#022067' }} />
                     INFO DEL PROYECTO
                   </h4>
                   <div className="flex flex-col" style={{ gap: '0.75rem' }}>

@@ -57,7 +57,7 @@ function Breadcrumb({ product }: { product: Product }) {
       <Link
         to="/"
         className="transition-colors duration-200 hover:underline"
-        style={{ color: '#1548a0' }}
+        style={{ color: '#022067' }}
       >
         INICIO
       </Link>
@@ -65,7 +65,7 @@ function Breadcrumb({ product }: { product: Product }) {
       <Link
         to="/productos"
         className="transition-colors duration-200 hover:underline"
-        style={{ color: '#1548a0' }}
+        style={{ color: '#022067' }}
       >
         PRODUCTOS
       </Link>
@@ -73,7 +73,7 @@ function Breadcrumb({ product }: { product: Product }) {
       <Link
         to={`/productos?categoria=${product.category}`}
         className="uppercase transition-colors duration-200 hover:underline"
-        style={{ color: '#1548a0' }}
+        style={{ color: '#022067' }}
       >
         {product.categoryLabel}
       </Link>
@@ -161,13 +161,13 @@ function ProductGallery({ images, productName }: { images: string[]; productName
               style={{
                 width: '80px',
                 height: '80px',
-                border: currentIdx === i ? '2px solid #1548a0' : '1px solid #e2e8f0',
+                border: currentIdx === i ? '2px solid #022067' : '1px solid #e2e8f0',
                 opacity: currentIdx === i ? 1 : 0.6,
               }}
               onMouseEnter={(e) => {
                 if (currentIdx !== i) {
                   e.currentTarget.style.opacity = '1';
-                  e.currentTarget.style.borderColor = '#1548a0';
+                  e.currentTarget.style.borderColor = '#022067';
                 }
               }}
               onMouseLeave={(e) => {
@@ -351,7 +351,7 @@ export default function ProductoDetalle() {
               to="/productos"
               className="inline-flex items-center gap-2 mt-6 font-semibold uppercase text-white transition-all duration-200 hover:brightness-110"
               style={{
-                backgroundColor: '#1548a0',
+                backgroundColor: '#022067',
                 padding: '12px 24px',
                 borderRadius: '4px',
                 fontSize: '0.875rem',
@@ -452,7 +452,7 @@ export default function ProductoDetalle() {
                 </div>
               ) : product.price ? (
                 <div>
-                  <span className="font-bold flex items-center gap-2" style={{ fontSize: '1.1rem', color: '#1548a0' }}>
+                  <span className="font-bold flex items-center gap-2" style={{ fontSize: '1.1rem', color: '#022067' }}>
                     ${product.price.toLocaleString('es-ES')} USD
                   </span>
                   <span className="text-xs" style={{ color: '#94a3b8' }}>Precio distribuidor</span>
@@ -727,7 +727,7 @@ export default function ProductoDetalle() {
                       style={{ padding: '1rem', backgroundColor: '#f8f9fa' }}
                     >
                       <div className="flex items-center gap-3">
-                        <FileText size={20} style={{ color: '#1548a0' }} />
+                        <FileText size={20} style={{ color: '#022067' }} />
                         <div>
                           <p
                             className="font-medium"
@@ -775,7 +775,7 @@ export default function ProductoDetalle() {
                     <a
                       href="tel:+56990117784"
                       className="flex items-center gap-3 font-medium transition-colors duration-200 hover:underline"
-                      style={{ fontSize: '0.875rem', color: '#1548a0' }}
+                      style={{ fontSize: '0.875rem', color: '#022067' }}
                     >
                       <Phone size={16} />
                       +56 9 9011 7784
@@ -783,7 +783,7 @@ export default function ProductoDetalle() {
                     <a
                       href="mailto:ingenieria@thermapro.com"
                       className="flex items-center gap-3 font-medium transition-colors duration-200 hover:underline"
-                      style={{ fontSize: '0.875rem', color: '#1548a0' }}
+                      style={{ fontSize: '0.875rem', color: '#022067' }}
                     >
                       <Mail size={16} />
                       ingenieria@thermapro.com
@@ -793,7 +793,7 @@ export default function ProductoDetalle() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-3 font-medium transition-colors duration-200 hover:underline"
-                      style={{ fontSize: '0.875rem', color: '#1548a0' }}
+                      style={{ fontSize: '0.875rem', color: '#022067' }}
                     >
                       <MessageCircle size={16} />
                       Escribenos por WhatsApp
@@ -804,7 +804,7 @@ export default function ProductoDetalle() {
                     className="inline-flex items-center gap-2 font-semibold uppercase text-white transition-all duration-200 hover:brightness-110 mt-6"
                     style={{
                       fontSize: '0.8rem',
-                      backgroundColor: '#1548a0',
+                      backgroundColor: '#022067',
                       padding: '12px 24px',
                       borderRadius: '4px',
                     }}

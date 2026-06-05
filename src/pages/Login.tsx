@@ -256,7 +256,7 @@ export default function Login() {
                         onClick={() => setShowPassword(prev => !prev)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors duration-200"
                         style={{ color: '#4a5568' }}
-                        onMouseEnter={e => { e.currentTarget.style.color = '#1548a0'; }}
+                        onMouseEnter={e => { e.currentTarget.style.color = '#022067'; }}
                         onMouseLeave={e => { e.currentTarget.style.color = '#4a5568'; }}
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -278,7 +278,7 @@ export default function Login() {
                         setRecoverySent(false);
                       }}
                       className="text-sm transition-all duration-200"
-                      style={{ color: '#1548a0' }}
+                      style={{ color: '#022067' }}
                       onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline'; }}
                       onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none'; }}
                     >
@@ -406,7 +406,7 @@ export default function Login() {
                       type="submit"
                       className="w-full font-semibold uppercase text-sm transition-all hover:brightness-110"
                       style={{
-                        backgroundColor: '#1548a0',
+                        backgroundColor: '#022067',
                         color: '#ffffff',
                         padding: '14px',
                         borderRadius: '4px',
@@ -439,7 +439,7 @@ export default function Login() {
                     type="button"
                     onClick={() => setView('login')}
                     className="text-sm font-medium transition-all duration-200 inline-flex items-center gap-1"
-                    style={{ color: '#1548a0' }}
+                    style={{ color: '#022067' }}
                     onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline'; }}
                     onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none'; }}
                   >
@@ -472,7 +472,7 @@ export default function Login() {
               <Link
                 to="/productos"
                 className="inline-flex items-center gap-1 font-semibold text-sm uppercase px-7 py-3.5 rounded transition-all hover:brightness-110"
-                style={{ backgroundColor: '#1548a0', color: '#ffffff' }}
+                style={{ backgroundColor: '#022067', color: '#ffffff' }}
               >
                 VER PRODUCTOS <ArrowRight size={16} />
               </Link>

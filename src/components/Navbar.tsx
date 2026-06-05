@@ -50,13 +50,13 @@ export default function Navbar() {
         }}
       >
         <div className="container-tp flex items-center justify-between" style={{ height: '72px' }}>
-          {/* Brand */}
+          {/* Brand - NAE text only, no oval */}
           <Link
             to="/"
-            className="text-white font-extrabold text-xl tracking-tight uppercase"
-            style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '-0.02em' }}
+            className="text-white font-black text-2xl tracking-tight uppercase"
+            style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em' }}
           >
-            THERMAPRO
+            NAE
           </Link>
 
           {/* Desktop Nav Links */}

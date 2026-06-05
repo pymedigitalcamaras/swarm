@@ -25,7 +25,7 @@ const values = [
   {
     icon: Wrench,
     iconBg: 'rgba(21,72,160,0.1)',
-    iconColor: '#1548a0',
+    iconColor: '#022067',
     title: 'INGENIERÍA LOCAL',
     description:
       'Equipos diseñados y probados para las condiciones climáticas, eléctricas y constructivas de cada país latinoamericano.',
@@ -49,7 +49,7 @@ const values = [
   {
     icon: Headphones,
     iconBg: 'rgba(21,72,160,0.1)',
-    iconColor: '#1548a0',
+    iconColor: '#022067',
     title: 'SOPORTE DEDICADO',
     description:
       'Línea directa con ingenieros especializados. Respuesta en menos de 24 horas en todos los canales de comunicación.',
@@ -62,7 +62,7 @@ const teamMembers = [
     role: 'CEO & Fundador',
     bio: '15 años en HVAC industrial. Lideró la expansión desde Chile a 5 países.',
     initials: 'AH',
-    bgColor: '#1548a0',
+    bgColor: '#022067',
   },
   {
     name: 'María Paz Soto',
@@ -83,7 +83,7 @@ const teamMembers = [
     role: 'Gerente de Operaciones',
     bio: 'Gestión de cadena de suministro y logística multinacional.',
     initials: 'CR',
-    bgColor: '#1548a0',
+    bgColor: '#022067',
   },
 ];
 
@@ -610,7 +610,7 @@ export default function Nosotros() {
                       e.currentTarget.style.transform = 'translateY(-4px)';
                       e.currentTarget.style.boxShadow =
                         '0 8px 24px rgba(0,0,0,0.08)';
-                      e.currentTarget.style.borderColor = '#1548a0';
+                      e.currentTarget.style.borderColor = '#022067';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = 'translateY(0)';
@@ -869,7 +869,7 @@ export default function Nosotros() {
                     onMouseEnter={(e) => {
                       e.currentTarget.style.filter = 'grayscale(0%)';
                       e.currentTarget.style.opacity = '1';
-                      e.currentTarget.style.borderColor = '#1548a0';
+                      e.currentTarget.style.borderColor = '#022067';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.filter = 'grayscale(100%)';
@@ -932,7 +932,7 @@ export default function Nosotros() {
                       cursor: 'default',
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = '#1548a0';
+                      e.currentTarget.style.borderColor = '#022067';
                       e.currentTarget.style.backgroundColor =
                         'rgba(21,72,160,0.05)';
                       e.currentTarget.style.transform = 'translateY(-2px)';

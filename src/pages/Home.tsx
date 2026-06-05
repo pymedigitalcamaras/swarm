@@ -139,11 +139,11 @@ function HeroSection() {
         }}
       />
 
-      {/* Animated gradient overlay */}
+      {/* Animated gradient overlay - NAE blue */}
       <div
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse at center, rgba(21,72,160,0.25) 0%, rgba(15,15,18,0.7) 70%, #0f0f12 100%)',
+          background: 'radial-gradient(ellipse at center, rgba(2,32,103,0.3) 0%, rgba(15,15,18,0.7) 70%, #0f0f12 100%)',
         }}
       />
 
@@ -165,6 +165,21 @@ function HeroSection() {
         className="relative flex flex-col items-center justify-end text-center px-6"
         style={{ zIndex: 10, height: '100%', paddingBottom: '15vh', pointerEvents: 'none' }}
       >
+        {/* NAE Logo with oval */}
+        <div className="mb-4" style={{ opacity: 0 }} ref={(el) => {
+          if (el) gsap.fromTo(el, { opacity: 0, y: 20, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 1, ease: 'power3.out', delay: 0.3 });
+        }}>
+          <img
+            src="/logo-nae-ovalo.png"
+            alt="NAE - New Age Energy"
+            style={{
+              height: 'clamp(80px, 12vw, 140px)',
+              width: 'auto',
+              filter: 'drop-shadow(0 4px 30px rgba(2,32,103,0.5))',
+            }}
+          />
+        </div>
+
         {/* Eyebrow */}
         <span
           className="uppercase font-medium mb-6"
@@ -441,7 +456,7 @@ function ProductCard({ product, cardRef, userRole }: { product: Product; cardRef
               <span className="block text-xs font-normal" style={{ color: '#94a3b8' }}>Precio venta</span>
             </span>
           ) : product.price ? (
-            <span className="font-bold" style={{ fontSize: '0.8rem', color: '#1548a0' }}>
+            <span className="font-bold" style={{ fontSize: '0.8rem', color: '#022067' }}>
               ${product.price.toLocaleString('es-ES')} USD
               <span className="block text-xs font-normal" style={{ color: '#94a3b8' }}>Precio distribuidor</span>
             </span>
@@ -904,7 +919,7 @@ function TrustSection() {
                   padding: '0.75rem 1.5rem',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#1548a0';
+                  e.currentTarget.style.borderColor = '#022067';
                   e.currentTarget.style.backgroundColor = 'rgba(21,72,160,0.05)';
                 }}
                 onMouseLeave={(e) => {

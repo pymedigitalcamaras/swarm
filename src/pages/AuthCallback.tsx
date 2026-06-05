@@ -83,7 +83,7 @@ export default function AuthCallback() {
       <div className="text-center p-8 max-w-md">
         {status === 'loading' && (
           <>
-            <Loader2 size={48} className="animate-spin mx-auto mb-4" style={{ color: '#1548a0' }} />
+            <Loader2 size={48} className="animate-spin mx-auto mb-4" style={{ color: '#022067' }} />
             <h2 className="text-xl font-bold uppercase mb-2" style={{ color: '#ffffff' }}>
               Confirmando tu cuenta
             </h2>

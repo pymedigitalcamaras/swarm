@@ -406,7 +406,7 @@ export default function Herramientas() {
         <section
           className="relative"
           style={{
-            background: 'linear-gradient(135deg, #1548a0 0%, #2a9d8f 100%)',
+            background: 'linear-gradient(135deg, #022067 0%, #2a9d8f 100%)',
             padding: 'clamp(7rem, 12vw, 10rem) 0 clamp(3rem, 6vw, 5rem)',
           }}
         >
@@ -465,7 +465,7 @@ export default function Herramientas() {
                 }}
                 onClick={() => document.getElementById('calculadora')?.scrollIntoView({ behavior: 'smooth' })}
                 onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = '#1548a0';
+                  e.currentTarget.style.borderColor = '#022067';
                   e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.1)';
                 }}
                 onMouseLeave={e => {
@@ -507,7 +507,7 @@ export default function Herramientas() {
                 }}
                 onClick={() => document.getElementById('configurador')?.scrollIntoView({ behavior: 'smooth' })}
                 onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = '#1548a0';
+                  e.currentTarget.style.borderColor = '#022067';
                   e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.1)';
                 }}
                 onMouseLeave={e => {
@@ -519,7 +519,7 @@ export default function Herramientas() {
                   className="w-12 h-12 rounded-lg flex items-center justify-center"
                   style={{ backgroundColor: 'rgba(21,72,160,0.1)' }}
                 >
-                  <Cpu size={24} style={{ color: '#1548a0' }} />
+                  <Cpu size={24} style={{ color: '#022067' }} />
                 </div>
                 <h3 className="font-bold uppercase mt-5" style={{ fontSize: '1.1rem', color: '#1a1a2e', letterSpacing: '0.02em' }}>
                   SELECTOR DE EQUIPO
@@ -549,7 +549,7 @@ export default function Herramientas() {
                 }}
                 onClick={() => document.getElementById('simulador')?.scrollIntoView({ behavior: 'smooth' })}
                 onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = '#1548a0';
+                  e.currentTarget.style.borderColor = '#022067';
                   e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.1)';
                 }}
                 onMouseLeave={e => {
@@ -717,7 +717,7 @@ export default function Herramientas() {
                   <Button
                     className="w-full mt-4 font-semibold uppercase text-sm transition-all hover:brightness-110"
                     style={{
-                      backgroundColor: '#1548a0',
+                      backgroundColor: '#022067',
                       color: '#ffffff',
                       padding: '14px',
                       borderRadius: '4px',
@@ -970,7 +970,7 @@ export default function Herramientas() {
                         backgroundColor: wizard.step > s || (wizardComplete && wizard.step === 5)
                           ? '#2a9d8f'
                           : wizard.step === s
-                            ? '#1548a0'
+                            ? '#022067'
                             : '#e2e8f0',
                         transform: wizard.step === s ? 'scale(1.2)' : 'scale(1)',
                       }}
@@ -1013,13 +1013,13 @@ export default function Herramientas() {
                               onClick={() => selectOption(currentQuestion.field, opt.value)}
                               className="flex flex-col items-center justify-center gap-2 rounded-lg border-2 transition-all duration-200 min-w-[140px] px-5 py-4"
                               style={{
-                                borderColor: isSelected ? '#1548a0' : '#e2e8f0',
-                                backgroundColor: isSelected ? '#1548a0' : '#ffffff',
+                                borderColor: isSelected ? '#022067' : '#e2e8f0',
+                                backgroundColor: isSelected ? '#022067' : '#ffffff',
                                 color: isSelected ? '#ffffff' : '#1a1a2e',
                               }}
                               onMouseEnter={e => {
                                 if (!isSelected) {
-                                  e.currentTarget.style.borderColor = '#1548a0';
+                                  e.currentTarget.style.borderColor = '#022067';
                                   e.currentTarget.style.backgroundColor = 'rgba(21,72,160,0.05)';
                                 }
                               }}
@@ -1060,7 +1060,7 @@ export default function Herramientas() {
                           disabled={!wizard[currentQuestion.field]}
                           className="font-semibold text-sm uppercase transition-all hover:brightness-110 disabled:opacity-50"
                           style={{
-                            backgroundColor: '#1548a0',
+                            backgroundColor: '#022067',
                             color: '#ffffff',
                             padding: '10px 24px',
                           }}
@@ -1095,7 +1095,7 @@ export default function Herramientas() {
                         className="w-14 h-14 rounded-lg flex-shrink-0 flex items-center justify-center"
                         style={{ backgroundColor: 'rgba(21,72,160,0.1)' }}
                       >
-                        <Cpu size={28} style={{ color: '#1548a0' }} />
+                        <Cpu size={28} style={{ color: '#022067' }} />
                       </div>
                       <div>
                         <p className="font-semibold text-sm" style={{ color: '#1a1a2e' }}>
@@ -1125,7 +1125,7 @@ export default function Herramientas() {
                     <Button
                       className="font-semibold uppercase text-xs transition-all hover:brightness-110"
                       style={{
-                        backgroundColor: '#1548a0',
+                        backgroundColor: '#022067',
                         color: '#ffffff',
                         padding: '12px 24px',
                         borderRadius: '4px',
@@ -1202,7 +1202,7 @@ export default function Herramientas() {
                       </Label>
                       <span
                         className="text-sm font-bold px-3 py-1 rounded"
-                        style={{ backgroundColor: 'rgba(21,72,160,0.1)', color: '#1548a0' }}
+                        style={{ backgroundColor: 'rgba(21,72,160,0.1)', color: '#022067' }}
                       >
                         {sim.unitsPerMonth}
                       </span>
@@ -1213,8 +1213,8 @@ export default function Herramientas() {
                       max={20}
                       value={sim.unitsPerMonth}
                       onChange={e => setSim(prev => ({ ...prev, unitsPerMonth: parseInt(e.target.value) }))}
-                      className="w-full accent-[#1548a0]"
-                      style={{ accentColor: '#1548a0' }}
+                      className="w-full accent-[#022067]"
+                      style={{ accentColor: '#022067' }}
                     />
                     <div className="flex justify-between mt-1">
                       <span className="text-xs" style={{ color: '#4a5568' }}>1</span>
@@ -1337,7 +1337,7 @@ export default function Herramientas() {
                             className="h-4 rounded-full transition-all duration-1000 flex items-center justify-end pr-2"
                             style={{
                               width: '100%',
-                              backgroundColor: '#1548a0',
+                              backgroundColor: '#022067',
                             }}
                           >
                             <span className="text-xs font-bold" style={{ color: '#fff' }}>
@@ -1427,7 +1427,7 @@ export default function Herramientas() {
               <Link
                 to="/contacto"
                 className="inline-flex items-center gap-1 font-semibold text-sm uppercase px-6 py-3 rounded transition-all hover:brightness-110 border"
-                style={{ borderColor: '#1548a0', color: '#1548a0', backgroundColor: 'transparent' }}
+                style={{ borderColor: '#022067', color: '#022067', backgroundColor: 'transparent' }}
               >
                 CONTACTAR ASESOR
               </Link>

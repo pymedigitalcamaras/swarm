@@ -71,7 +71,7 @@ function ProductStatusBadge({ isActive }: { isActive: boolean }) {
 
 /* ─── Stat Card ─── */
 const colorMap: Record<string, string> = {
-  '#1548a0': 'text-blue-700 bg-blue-50',
+  '#022067': 'text-blue-700 bg-blue-50',
   '#2a9d8f': 'text-teal-700 bg-teal-50',
   '#e63946': 'text-red-700 bg-red-50',
   '#f59e0b': 'text-amber-700 bg-amber-50',
@@ -422,7 +422,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-3">
             <div
               className="flex items-center justify-center rounded-lg"
-              style={{ width: 36, height: 36, backgroundColor: '#1548a0' }}
+              style={{ width: 36, height: 36, backgroundColor: '#022067' }}
             >
               <ShieldCheck size={18} className="text-white" />
             </div>
@@ -458,7 +458,7 @@ export default function AdminDashboard() {
                   onClick={() => setActiveTab(tab.key)}
                   className={`flex items-center gap-2.5 px-3 py-2.5 rounded-md text-xs font-medium uppercase tracking-wider transition-all whitespace-nowrap ${
                     activeTab === tab.key
-                      ? 'bg-[#1548a0] text-white'
+                      ? 'bg-[#022067] text-white'
                       : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >
@@ -483,7 +483,7 @@ export default function AdminDashboard() {
               title="Usuarios"
               value={stats.totalUsers}
               icon={Users}
-              color="#1548a0"
+              color="#022067"
               isLoading={isLoading}
             />
             <StatCard
@@ -574,7 +574,7 @@ export default function AdminDashboard() {
                             </TableCell>
                             <TableCell>
                               <select
-                                className="text-xs border border-slate-200 rounded-md px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-[#1548a0]"
+                                className="text-xs border border-slate-200 rounded-md px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-[#022067]"
                                 value={lead.status}
                                 onChange={(e) => updateLeadStatus(lead.id, e.target.value as DbLead['status'])}
                               >
@@ -694,7 +694,7 @@ export default function AdminDashboard() {
                           <select
                             value={userForm.role}
                             onChange={e => setUserForm(prev => ({ ...prev, role: e.target.value as 'personal_natural' | 'instalador' | 'distribuidor_acs' }))}
-                            className="w-full mt-1 border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1548a0]"
+                            className="w-full mt-1 border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#022067]"
                           >
                             <option value="personal_natural">Personal Natural</option>
                             <option value="instalador">Instalador de Productos</option>
@@ -721,7 +721,7 @@ export default function AdminDashboard() {
                     {createdUserPassword ? (
                       <Button
                         onClick={() => { setUserDialogOpen(false); resetUserForm(); }}
-                        style={{ backgroundColor: '#1548a0', color: 'white' }}
+                        style={{ backgroundColor: '#022067', color: 'white' }}
                       >
                         Cerrar
                       </Button>
@@ -733,7 +733,7 @@ export default function AdminDashboard() {
                         <Button
                           onClick={createUser}
                           disabled={userSubmitting}
-                          style={{ backgroundColor: '#1548a0', color: 'white' }}
+                          style={{ backgroundColor: '#022067', color: 'white' }}
                         >
                           {userSubmitting && <Loader2 size={14} className="animate-spin mr-1" />}
                           Crear Usuario
@@ -762,7 +762,7 @@ export default function AdminDashboard() {
                   <Button
                     size="sm"
                     className="text-xs"
-                    style={{ backgroundColor: '#1548a0', color: 'white' }}
+                    style={{ backgroundColor: '#022067', color: 'white' }}
                     onClick={openCreateUser}
                   >
                     <Plus size={14} className="mr-1" />
@@ -815,7 +815,7 @@ export default function AdminDashboard() {
                             <TableCell className="text-sm text-slate-600">{user.phone || '-'}</TableCell>
                             <TableCell>
                               <select
-                                className="text-xs border border-slate-200 rounded-md px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-[#1548a0]"
+                                className="text-xs border border-slate-200 rounded-md px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-[#022067]"
                                 value={user.role}
                                 onChange={(e) => updateUserRole(user.id, e.target.value)}
                               >
@@ -879,7 +879,7 @@ export default function AdminDashboard() {
                       <select
                         value={productForm.category_id}
                         onChange={e => setProductForm(prev => ({ ...prev, category_id: e.target.value }))}
-                        className="w-full mt-1 border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1548a0]"
+                        className="w-full mt-1 border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#022067]"
                       >
                         <option value="1">Aerotermia</option>
                         <option value="2">Geotermia</option>
@@ -1008,7 +1008,7 @@ export default function AdminDashboard() {
                     <Button
                       onClick={saveProduct}
                       disabled={productSubmitting}
-                      style={{ backgroundColor: '#1548a0', color: 'white' }}
+                      style={{ backgroundColor: '#022067', color: 'white' }}
                     >
                       {productSubmitting && <Loader2 size={14} className="animate-spin mr-1" />}
                       {editingProduct ? 'Guardar Cambios' : 'Crear Producto'}
@@ -1035,7 +1035,7 @@ export default function AdminDashboard() {
                   <Button
                     size="sm"
                     className="text-xs"
-                    style={{ backgroundColor: '#1548a0', color: 'white' }}
+                    style={{ backgroundColor: '#022067', color: 'white' }}
                     onClick={openCreateProduct}
                   >
                     <Plus size={14} className="mr-1" />
@@ -1101,7 +1101,7 @@ export default function AdminDashboard() {
                                   onClick={() => openEditProduct(product)}
                                   title="Editar"
                                 >
-                                  <Pencil size={14} className="text-[#1548a0]" />
+                                  <Pencil size={14} className="text-[#022067]" />
                                 </Button>
                                 <Button
                                   variant="ghost" size="sm" className="h-8 w-8 p-0"

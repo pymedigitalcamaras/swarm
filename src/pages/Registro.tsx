@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import {
   ArrowRight, Eye, EyeOff, Check, Shield, Lock,
@@ -39,10 +39,9 @@ const USER_TYPE_PRICES: Record<string, string> = {
 };
 
 // ─── Steps ───
-type Step = 'form' | 'submitting' | 'otp' | 'verifying' | 'success';
+type Step = 'form' | 'sending_otp' | 'otp' | 'verifying' | 'creating_profile' | 'success';
 
 export default function Registro() {
-  const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Form
@@ -94,64 +93,49 @@ export default function Registro() {
     return Object.keys(e).length === 0;
   };
 
-  // ─── STEP 1: Submit form → create account ───
-  const handleCreateAccount = async () => {
+  // ─── STEP 1: Send OTP (creates user implicitly) ───
+  const handleSendOtp = async () => {
     if (!validate()) return;
-    setStep('submitting');
+    setStep('sending_otp');
     setGlobalError('');
 
     try {
-      // 1. Create auth user
-      const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
+      // Check if user already exists
+      const { data: existing } = await supabase
+        .from('users')
+        .select('email')
+        .eq('email', form.email.trim())
+        .maybeSingle();
+
+      if (existing) {
+        setGlobalError('Este email ya esta registrado. Intenta iniciar sesion.');
+        setStep('form');
+        return;
+      }
+
+      // Send OTP - this creates the user implicitly when verified
+      const { error: otpErr } = await supabase.auth.signInWithOtp({
         email: form.email.trim(),
-        password: form.password,
         options: {
-          data: { full_name: form.fullName.trim() },
-          emailRedirectTo: 'https://swarm-ehde.vercel.app/#/auth/callback',
+          shouldCreateUser: true,
+          data: {
+            full_name: form.fullName.trim(),
+            phone: form.phone.trim(),
+            country: form.country.trim(),
+            city: form.city.trim(),
+            company: form.company.trim() || null,
+            user_type: form.userType,
+          },
         },
       });
 
-      if (signUpErr) {
-        setGlobalError(signUpErr.message);
-        setStep('form');
-        return;
-      }
-
-      if (!signUpData.user?.id) {
-        setGlobalError('Error al crear usuario. Intenta de nuevo.');
-        setStep('form');
-        return;
-      }
-
-      // 2. Save profile in users table
-      const { error: profileErr } = await supabase.from('users').insert({
-        id: signUpData.user.id,
-        email: form.email.trim(),
-        full_name: form.fullName.trim(),
-        company_name: form.company.trim() || null,
-        phone: form.phone.trim(),
-        country: form.country.trim(),
-        city: form.city.trim(),
-        role: form.userType,
-        is_active: true,
-      });
-
-      if (profileErr) {
-        console.error('Profile insert:', profileErr);
-      }
-
-      // 3. Send OTP code
-      const { error: otpErr } = await supabase.auth.signInWithOtp({
-        email: form.email.trim(),
-        options: { shouldCreateUser: false },
-      });
-
       if (otpErr) {
-        console.error('OTP send error:', otpErr);
-        // Still proceed - user was created
+        setGlobalError('Error al enviar codigo: ' + otpErr.message);
+        setStep('form');
+        return;
       }
 
-      // 4. Show OTP input
+      // Show OTP input
       setStep('otp');
       setOtpCode('');
       setOtpError('');
@@ -162,7 +146,7 @@ export default function Registro() {
     }
   };
 
-  // ─── STEP 2: Verify OTP ───
+  // ─── STEP 2: Verify OTP + set password + create profile ───
   const handleVerifyOtp = async () => {
     if (!otpCode || otpCode.length < 6) {
       setOtpError('Ingresa los 6 digitos');
@@ -172,19 +156,52 @@ export default function Registro() {
     setOtpError('');
 
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
+      // 1. Verify OTP - this creates the session
+      const { data: verifyData, error: verifyErr } = await supabase.auth.verifyOtp({
         email: form.email.trim(),
         token: otpCode,
         type: 'email',
       });
 
-      if (error || !data.session) {
-        setOtpError('Codigo incorrecto. Intenta de nuevo.');
+      if (verifyErr || !verifyData.session) {
+        setOtpError(verifyErr?.message || 'Codigo incorrecto. Intenta de nuevo.');
         setStep('otp');
         return;
       }
 
-      // OTP verified!
+      // 2. Set password now that we have a session
+      const { error: pwErr } = await supabase.auth.updateUser({
+        password: form.password,
+      });
+
+      if (pwErr) {
+        console.error('Password set error:', pwErr);
+        // Continue anyway - user can reset password later
+      }
+
+      // 3. Save profile in users table
+      setStep('creating_profile');
+
+      if (verifyData.user) {
+        const { error: profileErr } = await supabase.from('users').insert({
+          id: verifyData.user.id,
+          email: form.email.trim(),
+          full_name: form.fullName.trim(),
+          company_name: form.company.trim() || null,
+          phone: form.phone.trim(),
+          country: form.country.trim(),
+          city: form.city.trim(),
+          role: form.userType,
+          is_active: true,
+        });
+
+        if (profileErr) {
+          console.error('Profile insert error:', profileErr);
+          // Don't block - user has auth account
+        }
+      }
+
+      // 4. Success!
       setStep('success');
       setTimeout(() => {
         window.location.href = '/#/productos';
@@ -202,7 +219,7 @@ export default function Registro() {
     setOtpCode('');
     const { error } = await supabase.auth.signInWithOtp({
       email: form.email.trim(),
-      options: { shouldCreateUser: false },
+      options: { shouldCreateUser: true },
     });
     if (error) {
       setOtpError('Error al reenviar: ' + error.message);
@@ -228,7 +245,7 @@ export default function Registro() {
                 <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', fontWeight: 900, color: '#fff', lineHeight: 1.1, marginTop: '16px' }}>
                   ACCEDE A PRECIOS Y<br />HERRAMIENTAS EXCLUSIVAS
                 </h1>
-                <p style={{ color: '#94a3b8', marginTop: '12px', fontSize: '1rem' }}>Registrate gratis. Te contactamos en 24 horas.</p>
+                <p style={{ color: '#94a3b8', marginTop: '12px', fontSize: '1rem' }}>Registrate gratis. Te enviaremos un codigo de verificacion.</p>
               </div>
             </section>
 
@@ -247,7 +264,7 @@ export default function Registro() {
                       </div>
                     )}
 
-                    <form onSubmit={e => { e.preventDefault(); handleCreateAccount(); }} className="space-y-5">
+                    <form onSubmit={e => { e.preventDefault(); handleSendOtp(); }} className="space-y-5">
 
                       {/* Full Name */}
                       <div>
@@ -400,14 +417,14 @@ export default function Registro() {
         )}
 
         {/* ═══════════════════════════════════════════
-            STEP: SUBMITTING (creating account)
+            STEP: SENDING OTP
             ═══════════════════════════════════════════ */}
-        {step === 'submitting' && (
+        {step === 'sending_otp' && (
           <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0f0f12' }}>
             <div className="text-center">
               <Loader2 size={48} className="animate-spin mx-auto mb-4" style={{ color: '#1548a0' }} />
-              <h2 className="text-xl font-bold text-white uppercase">Creando tu cuenta...</h2>
-              <p className="mt-2" style={{ color: '#94a3b8' }}>Esto tomara solo unos segundos</p>
+              <h2 className="text-xl font-bold text-white uppercase">Enviando codigo...</h2>
+              <p className="mt-2" style={{ color: '#94a3b8' }}>Preparando tu verificacion</p>
             </div>
           </section>
         )}
@@ -482,7 +499,20 @@ export default function Registro() {
         )}
 
         {/* ═══════════════════════════════════════════
-            STEP: SUCCESS (redirecting)
+            STEP: CREATING PROFILE
+            ═══════════════════════════════════════════ */}
+        {step === 'creating_profile' && (
+          <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0f0f12' }}>
+            <div className="text-center">
+              <Loader2 size={48} className="animate-spin mx-auto mb-4" style={{ color: '#1548a0' }} />
+              <h2 className="text-xl font-bold text-white uppercase">Finalizando registro...</h2>
+              <p className="mt-2" style={{ color: '#94a3b8' }}>Guardando tu perfil</p>
+            </div>
+          </section>
+        )}
+
+        {/* ═══════════════════════════════════════════
+            STEP: SUCCESS
             ═══════════════════════════════════════════ */}
         {step === 'success' && (
           <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0f0f12' }}>

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import {
   ArrowRight, Eye, EyeOff, Check, Shield, Lock,
-  Loader2, Mail, User, Phone, MapPin, Building2, AlertCircle
+  Loader2, Mail, User, Phone, MapPin, Building2, AlertCircle, RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,7 +39,7 @@ const USER_TYPE_PRICES: Record<string, string> = {
 };
 
 // ─── Steps ───
-type Step = 'form' | 'sending_otp' | 'otp' | 'verifying' | 'creating_profile' | 'success';
+type Step = 'form' | 'sending' | 'otp' | 'verifying' | 'creating_profile' | 'success';
 
 export default function Registro() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -59,6 +59,8 @@ export default function Registro() {
   const [globalError, setGlobalError] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [otpError, setOtpError] = useState('');
+  // Track whether we have an active session (for magic link fallback)
+  const [, setHasSession] = useState(false);
 
   // GSAP
   useEffect(() => {
@@ -93,10 +95,10 @@ export default function Registro() {
     return Object.keys(e).length === 0;
   };
 
-  // ─── STEP 1: Send OTP (creates user implicitly) ───
+  // ─── STEP 1: Send OTP code ───
   const handleSendOtp = async () => {
     if (!validate()) return;
-    setStep('sending_otp');
+    setStep('sending');
     setGlobalError('');
 
     try {
@@ -113,7 +115,7 @@ export default function Registro() {
         return;
       }
 
-      // Send OTP - this creates the user implicitly when verified
+      // Send OTP via Supabase
       const { error: otpErr } = await supabase.auth.signInWithOtp({
         email: form.email.trim(),
         options: {
@@ -130,7 +132,11 @@ export default function Registro() {
       });
 
       if (otpErr) {
-        setGlobalError('Error al enviar codigo: ' + otpErr.message);
+        if (otpErr.message?.includes('rate limit') || otpErr.status === 429) {
+          setGlobalError('Demasiados intentos. Espera unos minutos y reintenta.');
+        } else {
+          setGlobalError('Error al enviar codigo: ' + otpErr.message);
+        }
         setStep('form');
         return;
       }
@@ -146,7 +152,7 @@ export default function Registro() {
     }
   };
 
-  // ─── STEP 2: Verify OTP + set password + create profile ───
+  // ─── STEP 2: Verify OTP ───
   const handleVerifyOtp = async () => {
     if (!otpCode || otpCode.length < 6) {
       setOtpError('Ingresa los 6 digitos');
@@ -156,7 +162,7 @@ export default function Registro() {
     setOtpError('');
 
     try {
-      // 1. Verify OTP - this creates the session
+      // Verify OTP
       const { data: verifyData, error: verifyErr } = await supabase.auth.verifyOtp({
         email: form.email.trim(),
         token: otpCode,
@@ -169,39 +175,30 @@ export default function Registro() {
         return;
       }
 
-      // 2. Set password now that we have a session
-      const { error: pwErr } = await supabase.auth.updateUser({
-        password: form.password,
-      });
+      // OTP verified - set password
+      setHasSession(true);
+      await supabase.auth.updateUser({ password: form.password });
 
-      if (pwErr) {
-        console.error('Password set error:', pwErr);
-        // Continue anyway - user can reset password later
-      }
-
-      // 3. Save profile in users table
+      // Create user profile
       setStep('creating_profile');
 
       if (verifyData.user) {
-        const { error: profileErr } = await supabase.from('users').insert({
-          id: verifyData.user.id,
-          email: form.email.trim(),
-          full_name: form.fullName.trim(),
-          company_name: form.company.trim() || null,
-          phone: form.phone.trim(),
-          country: form.country.trim(),
-          city: form.city.trim(),
-          role: form.userType,
-          is_active: true,
-        });
-
-        if (profileErr) {
-          console.error('Profile insert error:', profileErr);
-          // Don't block - user has auth account
-        }
+        try {
+          await supabase.from('users').insert({
+            id: verifyData.user.id,
+            email: form.email.trim(),
+            full_name: form.fullName.trim(),
+            company_name: form.company.trim() || null,
+            phone: form.phone.trim(),
+            country: form.country.trim(),
+            city: form.city.trim(),
+            role: form.userType,
+            is_active: true,
+          });
+        } catch (e) { console.error(e); }
       }
 
-      // 4. Success!
+      // Success!
       setStep('success');
       setTimeout(() => {
         window.location.href = '/#/productos';
@@ -210,6 +207,45 @@ export default function Registro() {
     } catch (err: any) {
       setOtpError(err?.message || 'Error al verificar');
       setStep('otp');
+    }
+  };
+
+  // ─── Alternative: verify via session check (for magic link users) ───
+  const handleCheckSession = async () => {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      // User clicked magic link and now has a session!
+      setHasSession(true);
+      setStep('verifying');
+
+      try {
+        // Set password
+        await supabase.auth.updateUser({ password: form.password });
+
+        // Create profile
+        setStep('creating_profile');
+        if (data.session.user) {
+          await supabase.from('users').insert({
+            id: data.session.user.id,
+            email: form.email.trim(),
+            full_name: form.fullName.trim(),
+            company_name: form.company.trim() || null,
+            phone: form.phone.trim(),
+            country: form.country.trim(),
+            city: form.city.trim(),
+            role: form.userType,
+            is_active: true,
+          });
+        }
+
+        setStep('success');
+        setTimeout(() => { window.location.href = '/#/productos'; }, 2500);
+      } catch (e) {
+        setOtpError('Error al finalizar el registro');
+        setStep('otp');
+      }
+    } else {
+      setOtpError('Aun no has confirmado. Revisa tu correo y haz clic en el link.');
     }
   };
 
@@ -222,7 +258,11 @@ export default function Registro() {
       options: { shouldCreateUser: true },
     });
     if (error) {
-      setOtpError('Error al reenviar: ' + error.message);
+      if (error.message?.includes('rate limit') || error.status === 429) {
+        setOtpError('Demasiados intentos. Espera unos minutos.');
+      } else {
+        setOtpError('Error al reenviar: ' + error.message);
+      }
     }
   };
 
@@ -236,7 +276,6 @@ export default function Registro() {
             ═══════════════════════════════════════════ */}
         {step === 'form' && (
           <>
-            {/* Hero */}
             <section className="registro-hero" style={{ backgroundColor: '#0f0f12', padding: '120px 20px 50px' }}>
               <div className="max-w-4xl mx-auto">
                 <span style={{ backgroundColor: '#1548a0', color: '#fff', padding: '5px 12px', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
@@ -249,14 +288,11 @@ export default function Registro() {
               </div>
             </section>
 
-            {/* Form */}
             <section className="registro-form" style={{ backgroundColor: '#f8f9fa', padding: '50px 20px' }}>
               <div className="max-w-4xl mx-auto">
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
-                  {/* Form */}
                   <div className="lg:col-span-3">
 
-                    {/* Global error */}
                     {globalError && (
                       <div className="mb-4 p-3 rounded flex items-center gap-2" style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#e63946' }}>
                         <AlertCircle size={16} />
@@ -266,7 +302,6 @@ export default function Registro() {
 
                     <form onSubmit={e => { e.preventDefault(); handleSendOtp(); }} className="space-y-5">
 
-                      {/* Full Name */}
                       <div>
                         <Label className="text-sm font-medium flex items-center gap-1.5"><User size={13} /> Nombre completo *</Label>
                         <Input value={form.fullName} onChange={e => update('fullName', e.target.value)}
@@ -275,7 +310,6 @@ export default function Registro() {
                         {errors.fullName && <p className="text-xs mt-1" style={{ color: '#e63946' }}>{errors.fullName}</p>}
                       </div>
 
-                      {/* Email + Phone */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label className="text-sm font-medium flex items-center gap-1.5"><Mail size={13} /> Email *</Label>
@@ -293,7 +327,6 @@ export default function Registro() {
                         </div>
                       </div>
 
-                      {/* Country + City */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label className="text-sm font-medium flex items-center gap-1.5"><MapPin size={13} /> Pais *</Label>
@@ -311,14 +344,12 @@ export default function Registro() {
                         </div>
                       </div>
 
-                      {/* Company */}
                       <div>
                         <Label className="text-sm font-medium flex items-center gap-1.5"><Building2 size={13} /> Empresa <span style={{ color: '#a0aec0' }}>(opcional)</span></Label>
                         <Input value={form.company} onChange={e => update('company', e.target.value)}
                           placeholder="Ej: ClimaSoluciones S.A." className="mt-1" style={{ borderColor: '#e2e8f0' }} />
                       </div>
 
-                      {/* User Type */}
                       <div>
                         <Label className="text-sm font-medium">Como te describes? *</Label>
                         <div className="mt-2 space-y-2">
@@ -340,7 +371,6 @@ export default function Registro() {
                         </div>
                       </div>
 
-                      {/* Password */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label className="text-sm font-medium flex items-center gap-1.5"><Lock size={13} /> Contrasena *</Label>
@@ -368,7 +398,6 @@ export default function Registro() {
                         </div>
                       </div>
 
-                      {/* Terms */}
                       <div>
                         <label className="flex items-start gap-3 cursor-pointer">
                           <div className="w-5 h-5 rounded border-2 mt-0.5 flex-shrink-0 flex items-center justify-center transition-all"
@@ -381,7 +410,6 @@ export default function Registro() {
                         {errors.acceptTerms && <p className="text-xs mt-1" style={{ color: '#e63946' }}>{errors.acceptTerms}</p>}
                       </div>
 
-                      {/* Submit */}
                       <Button type="submit" className="w-full font-bold uppercase text-sm"
                         style={{ backgroundColor: '#e63946', color: '#fff', padding: '16px', letterSpacing: '0.05em' }}>
                         CREAR CUENTA <ArrowRight size={16} className="ml-2" />
@@ -393,7 +421,6 @@ export default function Registro() {
                     </form>
                   </div>
 
-                  {/* Sidebar */}
                   <div className="lg:col-span-2">
                     <div className="sticky top-28 space-y-5">
                       <div className="p-5 rounded-lg bg-white border border-slate-200">
@@ -419,7 +446,7 @@ export default function Registro() {
         {/* ═══════════════════════════════════════════
             STEP: SENDING OTP
             ═══════════════════════════════════════════ */}
-        {step === 'sending_otp' && (
+        {step === 'sending' && (
           <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0f0f12' }}>
             <div className="text-center">
               <Loader2 size={48} className="animate-spin mx-auto mb-4" style={{ color: '#1548a0' }} />
@@ -430,7 +457,7 @@ export default function Registro() {
         )}
 
         {/* ═══════════════════════════════════════════
-            STEP: OTP (enter verification code)
+            STEP: OTP INPUT
             ═══════════════════════════════════════════ */}
         {step === 'otp' && (
           <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0f0f12', padding: '20px' }}>
@@ -451,6 +478,7 @@ export default function Registro() {
                   </div>
                 )}
 
+                {/* OTP Input */}
                 <div>
                   <Label className="text-xs font-semibold uppercase text-slate-500">Codigo de verificacion</Label>
                   <input
@@ -473,27 +501,41 @@ export default function Registro() {
                   VERIFICAR CODIGO
                 </Button>
 
+                {/* Alternative: magic link fallback */}
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <p className="text-xs text-slate-400 text-center mb-2">
+                    Si recibiste un link en vez de un codigo:
+                  </p>
+                  <Button variant="outline" className="w-full text-sm" onClick={handleCheckSession}>
+                    <RefreshCw size={14} className="mr-2" /> Ya hice clic en el link del correo
+                  </Button>
+                </div>
+
                 <div className="text-center mt-4 space-y-2">
-                  <button type="button" className="text-sm text-slate-500 hover:text-[#1548a0] underline" onClick={handleResendOtp}>No recibiste el codigo? Reenviar</button>
+                  <button type="button" className="text-sm text-slate-500 hover:text-[#1548a0] underline" onClick={handleResendOtp}>
+                    No recibiste el codigo? Reenviar
+                  </button>
                   <p className="text-xs text-slate-400">Revisa tambien tu carpeta de spam</p>
                 </div>
               </div>
 
               <p className="text-center mt-4">
-                <button className="text-xs text-slate-500 hover:text-white underline" onClick={() => setStep('form')}>Volver al formulario</button>
+                <button className="text-xs text-slate-500 hover:text-white underline" onClick={() => setStep('form')}>
+                  Volver al formulario
+                </button>
               </p>
             </div>
           </section>
         )}
 
         {/* ═══════════════════════════════════════════
-            STEP: VERIFYING (checking code)
+            STEP: VERIFYING
             ═══════════════════════════════════════════ */}
         {step === 'verifying' && (
           <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0f0f12' }}>
             <div className="text-center">
               <Loader2 size={48} className="animate-spin mx-auto mb-4" style={{ color: '#1548a0' }} />
-              <h2 className="text-xl font-bold text-white uppercase">Verificando codigo...</h2>
+              <h2 className="text-xl font-bold text-white uppercase">Verificando...</h2>
             </div>
           </section>
         )}

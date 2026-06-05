@@ -122,7 +122,8 @@ export default function Registro() {
         return;
       }
 
-      // 2. Save profile in users table
+      // 2. Save profile in users table (role must be 'distributor' for all non-admin)
+      const dbRole = 'distributor'; // DB enum only accepts: admin, distributor, visitor
       const { error: profileErr } = await supabase.from('users').insert({
         id: signUpData.user.id,
         email: form.email.trim(),
@@ -131,7 +132,7 @@ export default function Registro() {
         phone: form.phone.trim(),
         country: form.country.trim(),
         city: form.city.trim(),
-        role: form.userType,
+        role: dbRole,
         is_active: true,
       });
 

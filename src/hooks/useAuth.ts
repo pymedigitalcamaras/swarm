@@ -18,14 +18,18 @@ export interface AuthState {
   canSeeDistribuidorPrices: boolean
 }
 
-// Determine role from profile data
-function determineRole(profile: DbUserProfile | null): UserRole {
+// Determine role from profile + user metadata
+function determineRole(profile: DbUserProfile | null, userMetadata?: Record<string, unknown>): UserRole {
   if (!profile) return 'visitor'
+  // Check user_metadata.user_type first (set during registration)
+  const metaType = userMetadata?.user_type as string || userMetadata?.userType as string
+  if (metaType === 'personal_natural') return 'personal_natural'
+  if (metaType === 'instalador') return 'instalador'
+  if (metaType === 'distribuidor_acs') return 'distribuidor_acs'
+  // Fallback: check profile.role (DB enum: admin, distributor, visitor)
   const rawRole = profile.role as string
   if (rawRole === 'admin') return 'admin'
-  if (rawRole === 'personal_natural') return 'personal_natural'
-  if (rawRole === 'instalador') return 'instalador'
-  if (rawRole === 'distribuidor_acs' || rawRole === 'distributor') return 'distribuidor_acs'
+  if (rawRole === 'distributor') return 'distribuidor_acs' // distributor sees distribuidor prices
   return 'visitor'
 }
 
@@ -64,7 +68,7 @@ export function useAuth(): AuthState & {
   const [isLoading, setIsLoading] = useState(true)
   const initialized = useRef(false)
 
-  const fetchProfile = useCallback(async (userId: string, userEmail?: string) => {
+  const fetchProfile = useCallback(async (userId: string, userEmail?: string, userMetadata?: Record<string, unknown>) => {
     // Try by ID first, then by email as fallback
     let { data, error } = await supabase
       .from('users')
@@ -89,7 +93,7 @@ export function useAuth(): AuthState & {
     }
 
     setProfile(data as DbUserProfile)
-    setRole(determineRole(data as DbUserProfile))
+    setRole(determineRole(data as DbUserProfile, userMetadata))
   }, [])
 
   // Check session on mount (or debug admin bypass)
@@ -113,7 +117,7 @@ export function useAuth(): AuthState & {
 
       if (session?.user) {
         setUser(session.user)
-        await fetchProfile(session.user.id, session.user.email)
+        await fetchProfile(session.user.id, session.user.email, session.user.user_metadata)
       }
 
       setIsLoading(false)
@@ -128,7 +132,7 @@ export function useAuth(): AuthState & {
 
         if (session?.user) {
           setUser(session.user)
-          await fetchProfile(session.user.id, session.user.email)
+          await fetchProfile(session.user.id, session.user.email, session.user.user_metadata)
         } else {
           setUser(null)
           setProfile(null)
@@ -166,7 +170,7 @@ export function useAuth(): AuthState & {
 
     if (data.user) {
       setUser(data.user)
-      await fetchProfile(data.user.id, data.user.email)
+      await fetchProfile(data.user.id, data.user.email, data.user.user_metadata)
     }
 
     return {}
@@ -183,15 +187,17 @@ export function useAuth(): AuthState & {
       password,
       options: {
         emailRedirectTo: redirectUrl,
+        data: {
+          full_name: formData.full_name || '',
+          user_type: formData.user_type || 'personal_natural',
+        },
       },
     })
 
     if (error) return { error: error.message }
 
-    const role = formData.user_type === 'personal_natural' ? 'personal_natural'
-      : formData.user_type === 'instalador' ? 'instalador'
-      : formData.user_type === 'distribuidor_acs' ? 'distribuidor_acs'
-      : 'personal_natural'
+    // DB only accepts: admin, distributor, visitor
+    const dbRole = 'distributor'
 
     if (data.user) {
       const { error: profileError } = await supabase.from('users').insert({
@@ -202,7 +208,7 @@ export function useAuth(): AuthState & {
         phone: formData.phone || '',
         country: formData.country || '',
         city: formData.city || '',
-        role,
+        role: dbRole,
         is_active: true,
       })
 
@@ -211,7 +217,7 @@ export function useAuth(): AuthState & {
       }
 
       setUser(data.user)
-      await fetchProfile(data.user.id, data.user.email)
+      await fetchProfile(data.user.id, data.user.email, data.user.user_metadata)
     }
 
     return {}

@@ -140,7 +140,18 @@ export default function Registro() {
         // Don't block - user has auth account
       }
 
-      // 3. Already logged in! Show success
+      // 3. Login automatically (create session)
+      const { error: loginErr } = await supabase.auth.signInWithPassword({
+        email: form.email.trim(),
+        password: form.password,
+      });
+
+      if (loginErr) {
+        console.error('Auto-login error:', loginErr);
+        // Don't block - account was created, user can login manually
+      }
+
+      // 4. Show success and redirect
       setStep('success');
       setTimeout(() => {
         window.location.href = '/#/productos';

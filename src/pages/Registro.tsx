@@ -1,23 +1,17 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Layout from '@/components/Layout';
+import { gsap } from 'gsap';
+import {
+  ArrowRight, Eye, EyeOff, Check, Shield, Lock,
+  Loader2, Mail, User, Phone, MapPin, Building2, AlertCircle
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowRight, Eye, EyeOff, Check, Shield, Lock, Clock, Mail, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useGSAP } from '@gsap/react';
-import { useAuthContext } from '@/context/AuthContext';
+import Layout from '@/components/Layout';
 import { supabase } from '@/lib/supabase';
 
-gsap.registerPlugin(ScrollTrigger);
-
-/* ═══════════════════════════════════════════════════════════
-   Registration Page Component
-   ═══════════════════════════════════════════════════════════ */
-
+// ─── Types ───
 interface RegisterForm {
   fullName: string;
   email: string;
@@ -25,1012 +19,483 @@ interface RegisterForm {
   country: string;
   city: string;
   company: string;
+  userType: 'personal_natural' | 'instalador' | 'distribuidor_acs';
   password: string;
   confirmPassword: string;
-  userType: 'personal_natural' | 'instalador' | 'distribuidor_acs';
   acceptTerms: boolean;
-  acceptMarketing: boolean;
 }
 
-interface FormErrors {
-  fullName?: string;
-  email?: string;
-  phone?: string;
-  country?: string;
-  city?: string;
-  password?: string;
-  confirmPassword?: string;
-  userType?: string;
-  acceptTerms?: string;
-}
+// ─── Constants ───
+const USER_TYPE_LABELS: Record<string, string> = {
+  personal_natural: 'Personal Natural',
+  instalador: 'Instalador de Productos',
+  distribuidor_acs: 'Distribuidor Local de Equipos ACS',
+};
 
-const countries = [
-  'Chile',
-  'México',
-  'Colombia',
-  'Perú',
-  'Argentina',
-  'Ecuador',
-  'Uruguay',
-  'Otro',
-];
+const USER_TYPE_PRICES: Record<string, string> = {
+  personal_natural: 'Veras precios de venta al publico',
+  instalador: 'Veras precios de distribuidor',
+  distribuidor_acs: 'Veras precios de distribuidor',
+};
 
-const benefits = [
-  {
-    title: 'Precios de distribuidor',
-    description: 'Hasta 40% de descuento sobre precio de instalador.',
-  },
-  {
-    title: 'Fichas técnicas descargables',
-    description: 'PDFs de todos los equipos, manuales y certificados.',
-  },
-  {
-    title: 'Calculadora de ahorro',
-    description: 'Compara costos de operación entre tecnologías.',
-  },
-  {
-    title: 'Selector de equipos',
-    description: 'Encuentra el equipo ideal en 30 segundos.',
-  },
-  {
-    title: 'Soporte técnico priorizado',
-    description: 'Respuesta en menos de 24 horas.',
-  },
-  {
-    title: 'Leads de tu zona',
-    description: 'Oportunidades de proyectos en tu región.',
-  },
-];
+// ─── Steps ───
+type Step = 'form' | 'submitting' | 'otp' | 'verifying' | 'success';
 
 export default function Registro() {
-  const pageRef = useRef<HTMLDivElement>(null);
-  const formRef = useRef<HTMLDivElement>(null);
-  const sidebarRef = useRef<HTMLDivElement>(null);
-  const trustRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { register } = useAuthContext();
+  const containerRef = useRef<HTMLDivElement>(null);
 
+  // Form
   const [form, setForm] = useState<RegisterForm>({
-    fullName: '',
-    email: '',
-    phone: '',
-    country: '',
-    city: '',
-    company: '',
-    password: '',
-    confirmPassword: '',
-    userType: 'personal_natural',
-    acceptTerms: false,
-    acceptMarketing: false,
+    fullName: '', email: '', phone: '', country: '', city: '',
+    company: '', userType: 'personal_natural',
+    password: '', confirmPassword: '', acceptTerms: false,
   });
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
 
-  // OTP verification states
-  const [showOtpModal, setShowOtpModal] = useState(false);
+  // Flow
+  const [step, setStep] = useState<Step>('form');
+  const [globalError, setGlobalError] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [otpError, setOtpError] = useState('');
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-  const [isOtpVerified, setIsOtpVerified] = useState(false);
-  const [otpEmail, setOtpEmail] = useState('');
 
-  /* ── GSAP entrance animations ── */
-  useGSAP(() => {
-    if (!pageRef.current) return;
+  // GSAP
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const ctx = gsap.context(() => {
+      gsap.from('.registro-hero', { y: 30, opacity: 0, duration: 0.6, ease: 'power2.out' });
+      gsap.from('.registro-form', { y: 30, opacity: 0, duration: 0.6, delay: 0.15, ease: 'power2.out' });
+    }, containerRef);
+    return () => ctx.revert();
+  }, [step]);
 
-    gsap.from('.reg-eyebrow', {
-      opacity: 0,
-      y: 20,
-      duration: 0.5,
-      ease: 'power2.out',
-      scrollTrigger: { trigger: '.reg-eyebrow', start: 'top 85%' },
-    });
+  const update = (field: keyof RegisterForm, value: string | boolean) => {
+    setForm(p => ({ ...p, [field]: value }));
+    if (errors[field]) setErrors(e => { const n = { ...e }; delete n[field]; return n; });
+    if (globalError) setGlobalError('');
+  };
 
-    gsap.from('.reg-title', {
-      opacity: 0,
-      y: 40,
-      duration: 1.2,
-      ease: 'power3.out',
-      scrollTrigger: { trigger: '.reg-title', start: 'top 85%' },
-    });
-
-    gsap.from('.reg-subtitle', {
-      opacity: 0,
-      y: 20,
-      duration: 0.8,
-      delay: 0.3,
-      ease: 'power2.out',
-      scrollTrigger: { trigger: '.reg-subtitle', start: 'top 85%' },
-    });
-
-    if (formRef.current) {
-      gsap.from(formRef.current, {
-        opacity: 0,
-        x: -20,
-        duration: 0.8,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: formRef.current, start: 'top 80%' },
-      });
-    }
-
-    if (sidebarRef.current) {
-      gsap.from(sidebarRef.current, {
-        opacity: 0,
-        x: 20,
-        duration: 0.8,
-        delay: 0.15,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: sidebarRef.current, start: 'top 80%' },
-      });
-    }
-
-    gsap.from('.benefit-item', {
-      opacity: 0,
-      y: 15,
-      duration: 0.5,
-      stagger: 0.08,
-      ease: 'power2.out',
-      scrollTrigger: { trigger: '.benefits-list', start: 'top 85%' },
-    });
-
-    if (trustRef.current) {
-      gsap.from(trustRef.current, {
-        opacity: 0,
-        y: 20,
-        duration: 0.6,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: trustRef.current, start: 'top 85%' },
-      });
-    }
-  }, { scope: pageRef });
-
-  /* ── Form validation ── */
+  // ─── Validate form ───
   const validate = (): boolean => {
-    const newErrors: FormErrors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!form.fullName.trim() || form.fullName.length < 3) {
-      newErrors.fullName = 'Nombre completo es obligatorio (mín. 3 caracteres)';
-    }
-    if (!form.email.trim() || !emailRegex.test(form.email)) {
-      newErrors.email = 'Ingresa un email válido';
-    }
-    if (!form.phone.trim() || form.phone.length < 7) {
-      newErrors.phone = 'Teléfono es obligatorio (mín. 7 dígitos)';
-    }
-    if (!form.country) {
-      newErrors.country = 'Selecciona un país';
-    }
-    if (!form.city.trim()) {
-      newErrors.city = 'Ciudad es obligatoria';
-    }
-    if (!form.password || form.password.length < 6) {
-      newErrors.password = 'Mínimo 6 caracteres';
-    }
-    if (form.password !== form.confirmPassword) {
-      newErrors.confirmPassword = 'Las contraseñas no coinciden';
-    }
-    if (!form.acceptTerms) {
-      newErrors.acceptTerms = 'Debes aceptar los términos';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const e: Record<string, string> = {};
+    if (!form.fullName.trim()) e.fullName = 'Ingresa tu nombre';
+    if (!form.email.trim()) e.email = 'Ingresa tu email';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = 'Email invalido';
+    if (!form.phone.trim()) e.phone = 'Ingresa tu telefono';
+    if (!form.country.trim()) e.country = 'Ingresa tu pais';
+    if (!form.city.trim()) e.city = 'Ingresa tu ciudad';
+    if (!form.password) e.password = 'Crea una contrasena';
+    else if (form.password.length < 6) e.password = 'Minimo 6 caracteres';
+    if (form.password !== form.confirmPassword) e.confirmPassword = 'No coinciden';
+    if (!form.acceptTerms) e.acceptTerms = 'Debes aceptar';
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  /* ── Submit handler ── */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) {
-      toast.error('Corrige los errores del formulario');
-      return;
-    }
+  // ─── STEP 1: Submit form → create account ───
+  const handleCreateAccount = async () => {
+    if (!validate()) return;
+    setStep('submitting');
+    setGlobalError('');
 
-    setIsSubmitting(true);
-    const result = await register(form.email, form.password, {
-      full_name: form.fullName,
-      phone: form.phone,
-      country: form.country,
-      city: form.city,
-      company_name: form.company,
-      user_type: form.userType,
-    });
-    setIsSubmitting(false);
-
-    if (result.error) {
-      toast.error('Error al crear cuenta', { description: result.error });
-      return;
-    }
-
-    setIsSuccess(true);
-    toast.success('Cuenta creada exitosamente', {
-      description: 'Revisa tu correo para confirmar tu cuenta.',
-    });
-
-    // Send OTP for email verification
-    setOtpEmail(form.email);
-    const { error: otpError } = await supabase.auth.signInWithOtp({
-      email: form.email,
-      options: {
-        shouldCreateUser: false,
-        emailRedirectTo: 'https://swarm-ehde.vercel.app/#/login',
-      },
-    });
-
-    if (otpError) {
-      toast.error('Error al enviar código', { description: otpError.message });
-    } else {
-      setShowOtpModal(true);
-      toast.success('Código enviado', {
-        description: `Revisa tu correo ${form.email} e ingresa el código de 6 dígitos.`,
+    try {
+      // 1. Create auth user
+      const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
+        email: form.email.trim(),
+        password: form.password,
+        options: {
+          data: { full_name: form.fullName.trim() },
+          emailRedirectTo: 'https://swarm-ehde.vercel.app/#/auth/callback',
+        },
       });
+
+      if (signUpErr) {
+        setGlobalError(signUpErr.message);
+        setStep('form');
+        return;
+      }
+
+      if (!signUpData.user?.id) {
+        setGlobalError('Error al crear usuario. Intenta de nuevo.');
+        setStep('form');
+        return;
+      }
+
+      // 2. Save profile in users table
+      const { error: profileErr } = await supabase.from('users').insert({
+        id: signUpData.user.id,
+        email: form.email.trim(),
+        full_name: form.fullName.trim(),
+        company_name: form.company.trim() || null,
+        phone: form.phone.trim(),
+        country: form.country.trim(),
+        city: form.city.trim(),
+        role: form.userType,
+        is_active: true,
+      });
+
+      if (profileErr) {
+        console.error('Profile insert:', profileErr);
+      }
+
+      // 3. Send OTP code
+      const { error: otpErr } = await supabase.auth.signInWithOtp({
+        email: form.email.trim(),
+        options: { shouldCreateUser: false },
+      });
+
+      if (otpErr) {
+        console.error('OTP send error:', otpErr);
+        // Still proceed - user was created
+      }
+
+      // 4. Show OTP input
+      setStep('otp');
+      setOtpCode('');
+      setOtpError('');
+
+    } catch (err: any) {
+      setGlobalError(err?.message || 'Error inesperado');
+      setStep('form');
     }
   };
 
-  const verifyOtp = async () => {
+  // ─── STEP 2: Verify OTP ───
+  const handleVerifyOtp = async () => {
     if (!otpCode || otpCode.length < 6) {
-      setOtpError('Ingresa el código de 6 dígitos');
+      setOtpError('Ingresa los 6 digitos');
       return;
     }
-    setIsVerifyingOtp(true);
+    setStep('verifying');
     setOtpError('');
 
-    const { data, error } = await supabase.auth.verifyOtp({
-      email: otpEmail,
-      token: otpCode,
-      type: 'email',
-    });
-
-    if (error) {
-      setOtpError('Código inválido. Verifica e intenta de nuevo.');
-      setIsVerifyingOtp(false);
-      return;
-    }
-
-    if (data.user) {
-      setIsOtpVerified(true);
-      toast.success('¡Cuenta confirmada!', {
-        description: 'Tu email ha sido verificado exitosamente.',
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: form.email.trim(),
+        token: otpCode,
+        type: 'email',
       });
 
-      // Auto-redirect to products after 2 seconds
+      if (error || !data.session) {
+        setOtpError('Codigo incorrecto. Intenta de nuevo.');
+        setStep('otp');
+        return;
+      }
+
+      // OTP verified!
+      setStep('success');
       setTimeout(() => {
-        navigate('/productos');
-      }, 2000);
+        window.location.href = '/#/productos';
+      }, 2500);
+
+    } catch (err: any) {
+      setOtpError(err?.message || 'Error al verificar');
+      setStep('otp');
     }
-    setIsVerifyingOtp(false);
   };
 
-  const resendOtp = async () => {
+  // ─── Resend OTP ───
+  const handleResendOtp = async () => {
     setOtpError('');
+    setOtpCode('');
     const { error } = await supabase.auth.signInWithOtp({
-      email: otpEmail,
+      email: form.email.trim(),
       options: { shouldCreateUser: false },
     });
     if (error) {
-      toast.error('Error al reenviar', { description: error.message });
-    } else {
-      toast.success('Código reenviado', { description: 'Revisa tu correo.' });
+      setOtpError('Error al reenviar: ' + error.message);
     }
   };
 
-  const updateField = (field: keyof RegisterForm, value: string | boolean) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-    if (errors[field as keyof FormErrors]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
-    }
-  };
-
+  // ─── Render ───
   return (
     <Layout>
-      <div ref={pageRef}>
-        {/* ═══════════════════════════════════════════
-            SECTION 1: Page Header
-            ═══════════════════════════════════════════ */}
-        <section
-          style={{
-            backgroundColor: '#0f0f12',
-            padding: 'clamp(7rem, 12vw, 10rem) 0 clamp(2.5rem, 5vw, 4rem)',
-          }}
-        >
-          <div className="container-tp text-center" style={{ maxWidth: '900px' }}>
-            <div className="reg-eyebrow flex items-center justify-center gap-3 mb-6">
-              <span
-                className="inline-block"
-                style={{ width: '3rem', height: '2px', backgroundColor: '#e63946' }}
-              />
-              <span
-                className="text-xs font-medium uppercase"
-                style={{ letterSpacing: '0.12em', color: '#2a9d8f' }}
-              >
-                REGISTRO GRATUITO
-              </span>
-              <span
-                className="inline-block"
-                style={{ width: '3rem', height: '2px', backgroundColor: '#e63946' }}
-              />
-            </div>
-            <h1
-              className="reg-title font-black uppercase"
-              style={{
-                fontSize: 'clamp(2rem, 4.5vw, 5rem)',
-                color: '#ffffff',
-                lineHeight: 1.05,
-              }}
-            >
-              ACCEDE A PRECIOS Y HERRAMIENTAS EXCLUSIVAS
-            </h1>
-            <p
-              className="reg-subtitle mt-5"
-              style={{
-                fontSize: '1.05rem',
-                color: 'rgba(255,255,255,0.7)',
-                maxWidth: '600px',
-                margin: '1.5rem auto 0',
-                lineHeight: 1.5,
-              }}
-            >
-              Regístrate gratis como instalador o distribuidor. Obtén acceso inmediato a precios, fichas técnicas descargables y nuestras calculadoras interactivas.
-            </p>
-          </div>
-        </section>
+      <div ref={containerRef}>
 
         {/* ═══════════════════════════════════════════
-            SECTION 2: Form + Benefits
+            STEP: FORM
             ═══════════════════════════════════════════ */}
-        <section
-          style={{
-            backgroundColor: '#f8f9fa',
-            padding: '5rem 0 clamp(5rem, 8vw, 8rem)',
-          }}
-        >
-          <div className="container-tp" style={{ maxWidth: '1100px' }}>
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
-              {/* LEFT: Registration Form */}
-              <div ref={formRef} className="lg:col-span-3">
-                <div
-                  className="bg-white rounded-lg border p-8"
-                  style={{ borderColor: '#e2e8f0' }}
-                >
-                  {isSuccess ? (
-                    /* Success State */
-                    <div className="text-center py-8">
-                      <div
-                        className="w-16 h-16 rounded-full flex items-center justify-center mx-auto"
-                        style={{ backgroundColor: 'rgba(42,157,143,0.15)' }}
-                      >
-                        <Check size={32} style={{ color: '#2a9d8f' }} />
+        {step === 'form' && (
+          <>
+            {/* Hero */}
+            <section className="registro-hero" style={{ backgroundColor: '#0f0f12', padding: '120px 20px 50px' }}>
+              <div className="max-w-4xl mx-auto">
+                <span style={{ backgroundColor: '#1548a0', color: '#fff', padding: '5px 12px', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase' }}>
+                  NUEVO DISTRIBUIDOR
+                </span>
+                <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', fontWeight: 900, color: '#fff', lineHeight: 1.1, marginTop: '16px' }}>
+                  ACCEDE A PRECIOS Y<br />HERRAMIENTAS EXCLUSIVAS
+                </h1>
+                <p style={{ color: '#94a3b8', marginTop: '12px', fontSize: '1rem' }}>Registrate gratis. Te contactamos en 24 horas.</p>
+              </div>
+            </section>
+
+            {/* Form */}
+            <section className="registro-form" style={{ backgroundColor: '#f8f9fa', padding: '50px 20px' }}>
+              <div className="max-w-4xl mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
+                  {/* Form */}
+                  <div className="lg:col-span-3">
+
+                    {/* Global error */}
+                    {globalError && (
+                      <div className="mb-4 p-3 rounded flex items-center gap-2" style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#e63946' }}>
+                        <AlertCircle size={16} />
+                        <span className="text-sm">{globalError}</span>
                       </div>
-                      <h3
-                        className="font-bold uppercase mt-5"
-                        style={{ fontSize: '1.2rem', color: '#1a1a2e' }}
-                      >
-                        ¡CUENTA CREADA!
-                      </h3>
-                      <p className="mt-3" style={{ fontSize: '1rem', color: '#4a5568', lineHeight: 1.5 }}>
-                        Revisa tu correo para confirmar tu cuenta.
-                      </p>
-                      <p className="mt-2" style={{ fontSize: '0.9rem', color: '#2a9d8f' }}>
-                        En 24-48 horas un asesor te contactará.
-                      </p>
-                      <div className="flex justify-center gap-4 mt-6">
-                        <Button
-                          className="font-semibold uppercase text-sm transition-all hover:brightness-110"
-                          style={{
-                            backgroundColor: '#1548a0',
-                            color: '#ffffff',
-                            padding: '12px 32px',
-                            borderRadius: '4px',
-                          }}
-                          onClick={() => navigate('/productos')}
-                        >
-                          VER PRODUCTOS
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="font-semibold uppercase text-sm"
-                          onClick={() => {
-                            setIsSuccess(false);
-                            setForm({
-                              fullName: '',
-                              email: '',
-                              phone: '',
-                              country: '',
-                              city: '',
-                              company: '',
-                              password: '',
-                              confirmPassword: '',
-                              userType: 'personal_natural',
-                              acceptTerms: false,
-                              acceptMarketing: false,
-                            });
-                          }}
-                        >
-                          CREAR OTRA CUENTA
-                        </Button>
+                    )}
+
+                    <form onSubmit={e => { e.preventDefault(); handleCreateAccount(); }} className="space-y-5">
+
+                      {/* Full Name */}
+                      <div>
+                        <Label className="text-sm font-medium flex items-center gap-1.5"><User size={13} /> Nombre completo *</Label>
+                        <Input value={form.fullName} onChange={e => update('fullName', e.target.value)}
+                          placeholder="Ej: Juan Perez Garcia" className="mt-1"
+                          style={{ borderColor: errors.fullName ? '#e63946' : '#e2e8f0' }} />
+                        {errors.fullName && <p className="text-xs mt-1" style={{ color: '#e63946' }}>{errors.fullName}</p>}
                       </div>
-                    </div>
-                  ) : (
-                    <>
-                      <h3
-                        className="font-bold uppercase"
-                        style={{ fontSize: '1.1rem', color: '#1a1a2e', letterSpacing: '0.05em' }}
-                      >
-                        CREAR CUENTA DE DISTRIBUIDOR
-                      </h3>
-                      <p className="mt-2" style={{ fontSize: '0.85rem', color: '#4a5568' }}>
-                        Regístrate gratis. Te contactamos en 24 horas.
-                      </p>
 
-                      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-                        {/* Full name */}
+                      {/* Email + Phone */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label className="text-sm font-medium" style={{ color: '#1a1a2e' }}>
-                            Nombre completo *
-                          </Label>
-                          <Input
-                            placeholder="Ej: Carlos Rodríguez"
-                            value={form.fullName}
-                            onChange={e => updateField('fullName', e.target.value)}
-                            className="mt-1.5"
-                            style={{
-                              backgroundColor: '#f8f9fa',
-                              borderColor: errors.fullName ? '#e63946' : '#e2e8f0',
-                              fontSize: '0.95rem',
-                              padding: '12px 16px',
-                            }}
-                          />
-                          {errors.fullName && (
-                            <p className="mt-1 text-xs" style={{ color: '#e63946' }}>{errors.fullName}</p>
-                          )}
+                          <Label className="text-sm font-medium flex items-center gap-1.5"><Mail size={13} /> Email *</Label>
+                          <Input type="email" value={form.email} onChange={e => update('email', e.target.value)}
+                            placeholder="juan@ejemplo.com" className="mt-1"
+                            style={{ borderColor: errors.email ? '#e63946' : '#e2e8f0' }} />
+                          {errors.email && <p className="text-xs mt-1" style={{ color: '#e63946' }}>{errors.email}</p>}
                         </div>
-
-                        {/* Email */}
                         <div>
-                          <Label className="text-sm font-medium" style={{ color: '#1a1a2e' }}>
-                            Correo electrónico *
-                          </Label>
-                          <Input
-                            type="email"
-                            placeholder="tu@email.com"
-                            value={form.email}
-                            onChange={e => updateField('email', e.target.value)}
-                            className="mt-1.5"
-                            style={{
-                              backgroundColor: '#f8f9fa',
-                              borderColor: errors.email ? '#e63946' : '#e2e8f0',
-                              fontSize: '0.95rem',
-                              padding: '12px 16px',
-                            }}
-                          />
-                          {errors.email && (
-                            <p className="mt-1 text-xs" style={{ color: '#e63946' }}>{errors.email}</p>
-                          )}
+                          <Label className="text-sm font-medium flex items-center gap-1.5"><Phone size={13} /> Telefono / WhatsApp *</Label>
+                          <Input value={form.phone} onChange={e => update('phone', e.target.value)}
+                            placeholder="+56 9 1234 5678" className="mt-1"
+                            style={{ borderColor: errors.phone ? '#e63946' : '#e2e8f0' }} />
+                          {errors.phone && <p className="text-xs mt-1" style={{ color: '#e63946' }}>{errors.phone}</p>}
                         </div>
+                      </div>
 
-                        {/* Phone */}
+                      {/* Country + City */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label className="text-sm font-medium" style={{ color: '#1a1a2e' }}>
-                            Teléfono / WhatsApp *
-                          </Label>
-                          <Input
-                            type="tel"
-                            placeholder="Ej: +52 55 1234 5678"
-                            value={form.phone}
-                            onChange={e => updateField('phone', e.target.value)}
-                            className="mt-1.5"
-                            style={{
-                              backgroundColor: '#f8f9fa',
-                              borderColor: errors.phone ? '#e63946' : '#e2e8f0',
-                              fontSize: '0.95rem',
-                              padding: '12px 16px',
-                            }}
-                          />
-                          {errors.phone && (
-                            <p className="mt-1 text-xs" style={{ color: '#e63946' }}>{errors.phone}</p>
-                          )}
+                          <Label className="text-sm font-medium flex items-center gap-1.5"><MapPin size={13} /> Pais *</Label>
+                          <Input value={form.country} onChange={e => update('country', e.target.value)}
+                            placeholder="Chile" className="mt-1"
+                            style={{ borderColor: errors.country ? '#e63946' : '#e2e8f0' }} />
+                          {errors.country && <p className="text-xs mt-1" style={{ color: '#e63946' }}>{errors.country}</p>}
                         </div>
-
-                        {/* Country + City (2-col) */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <Label className="text-sm font-medium" style={{ color: '#1a1a2e' }}>
-                              País *
-                            </Label>
-                            <select
-                              className="mt-1.5 w-full rounded-md border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all"
-                              style={{
-                                backgroundColor: '#f8f9fa',
-                                borderColor: errors.country ? '#e63946' : '#e2e8f0',
-                                color: form.country ? '#1a1a2e' : '#a0aec0',
-                                fontSize: '0.95rem',
-                              }}
-                              value={form.country}
-                              onChange={e => updateField('country', e.target.value)}
-                            >
-                              <option value="">Selecciona país</option>
-                              {countries.map(c => (
-                                <option key={c} value={c}>{c}</option>
-                              ))}
-                            </select>
-                            {errors.country && (
-                              <p className="mt-1 text-xs" style={{ color: '#e63946' }}>{errors.country}</p>
-                            )}
-                          </div>
-                          <div>
-                            <Label className="text-sm font-medium" style={{ color: '#1a1a2e' }}>
-                              Ciudad *
-                            </Label>
-                            <Input
-                              placeholder="Ej: Santiago"
-                              value={form.city}
-                              onChange={e => updateField('city', e.target.value)}
-                              className="mt-1.5"
-                              style={{
-                                backgroundColor: '#f8f9fa',
-                                borderColor: errors.city ? '#e63946' : '#e2e8f0',
-                                fontSize: '0.95rem',
-                                padding: '12px 16px',
-                              }}
-                            />
-                            {errors.city && (
-                              <p className="mt-1 text-xs" style={{ color: '#e63946' }}>{errors.city}</p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Company (optional) */}
                         <div>
-                          <Label className="text-sm font-medium" style={{ color: '#1a1a2e' }}>
-                            Empresa <span style={{ color: '#a0aec0' }}>(opcional)</span>
-                          </Label>
-                          <Input
-                            placeholder="Ej: ClimaSoluciones S.A."
-                            value={form.company}
-                            onChange={e => updateField('company', e.target.value)}
-                            className="mt-1.5"
-                            style={{
-                              backgroundColor: '#f8f9fa',
-                              borderColor: '#e2e8f0',
-                              fontSize: '0.95rem',
-                              padding: '12px 16px',
-                            }}
-                          />
+                          <Label className="text-sm font-medium flex items-center gap-1.5"><MapPin size={13} /> Ciudad *</Label>
+                          <Input value={form.city} onChange={e => update('city', e.target.value)}
+                            placeholder="Santiago" className="mt-1"
+                            style={{ borderColor: errors.city ? '#e63946' : '#e2e8f0' }} />
+                          {errors.city && <p className="text-xs mt-1" style={{ color: '#e63946' }}>{errors.city}</p>}
                         </div>
+                      </div>
 
-                        {/* User Type - Critical for pricing */}
-                        <div>
-                          <Label className="text-sm font-medium" style={{ color: '#1a1a2e' }}>
-                            ¿Cómo te describes? *
-                          </Label>
-                          <div className="mt-1.5 space-y-2">
-                            {[
-                              { value: 'personal_natural', label: 'Personal Natural', desc: 'Verás precios de venta al público' },
-                              { value: 'instalador', label: 'Instalador de Productos', desc: 'Verás precios de distribuidor' },
-                              { value: 'distribuidor_acs', label: 'Distribuidor Local de Equipos ACS', desc: 'Verás precios de distribuidor' },
-                            ].map(option => (
-                              <label
-                                key={option.value}
-                                className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all"
-                                style={{
-                                  borderColor: form.userType === option.value ? '#1548a0' : '#e2e8f0',
-                                  backgroundColor: form.userType === option.value ? '#eef2ff' : '#f8f9fa',
-                                }}
-                                onClick={() => updateField('userType', option.value)}
-                              >
-                                <div
-                                  className="w-5 h-5 rounded-full border-2 mt-0.5 flex-shrink-0 flex items-center justify-center"
-                                  style={{
-                                    borderColor: form.userType === option.value ? '#1548a0' : '#cbd5e1',
-                                  }}
-                                >
-                                  {form.userType === option.value && (
-                                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#1548a0' }} />
-                                  )}
-                                </div>
-                                <div>
-                                  <p className="text-sm font-medium" style={{ color: '#1a1a2e' }}>{option.label}</p>
-                                  <p className="text-xs" style={{ color: '#64748b' }}>{option.desc}</p>
-                                </div>
-                              </label>
-                            ))}
-                          </div>
-                          {errors.userType && (
-                            <p className="mt-1 text-xs" style={{ color: '#e63946' }}>{errors.userType}</p>
-                          )}
+                      {/* Company */}
+                      <div>
+                        <Label className="text-sm font-medium flex items-center gap-1.5"><Building2 size={13} /> Empresa <span style={{ color: '#a0aec0' }}>(opcional)</span></Label>
+                        <Input value={form.company} onChange={e => update('company', e.target.value)}
+                          placeholder="Ej: ClimaSoluciones S.A." className="mt-1" style={{ borderColor: '#e2e8f0' }} />
+                      </div>
+
+                      {/* User Type */}
+                      <div>
+                        <Label className="text-sm font-medium">Como te describes? *</Label>
+                        <div className="mt-2 space-y-2">
+                          {(['personal_natural', 'instalador', 'distribuidor_acs'] as const).map(opt => (
+                            <label key={opt}
+                              className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all"
+                              style={{ borderColor: form.userType === opt ? '#1548a0' : '#e2e8f0', backgroundColor: form.userType === opt ? '#eef2ff' : '#fff' }}
+                              onClick={() => update('userType', opt)}>
+                              <div className="w-5 h-5 rounded-full border-2 mt-0.5 flex-shrink-0 flex items-center justify-center"
+                                style={{ borderColor: form.userType === opt ? '#1548a0' : '#cbd5e1' }}>
+                                {form.userType === opt && <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#1548a0' }} />}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium" style={{ color: '#1a1a2e' }}>{USER_TYPE_LABELS[opt]}</p>
+                                <p className="text-xs" style={{ color: '#64748b' }}>{USER_TYPE_PRICES[opt]}</p>
+                              </div>
+                            </label>
+                          ))}
                         </div>
+                      </div>
 
-                        {/* Password */}
+                      {/* Password */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label className="text-sm font-medium" style={{ color: '#1a1a2e' }}>
-                            Contraseña *
-                          </Label>
-                          <div className="relative mt-1.5">
-                            <Input
-                              type={showPassword ? 'text' : 'password'}
-                              placeholder="Mínimo 6 caracteres"
-                              value={form.password}
-                              onChange={e => updateField('password', e.target.value)}
-                              className="pr-10"
-                              style={{
-                                backgroundColor: '#f8f9fa',
-                                borderColor: errors.password ? '#e63946' : '#e2e8f0',
-                                fontSize: '0.95rem',
-                                padding: '12px 16px',
-                                paddingRight: '40px',
-                              }}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword(prev => !prev)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors duration-200"
-                              style={{ color: '#4a5568' }}
-                              onMouseEnter={e => { e.currentTarget.style.color = '#1548a0'; }}
-                              onMouseLeave={e => { e.currentTarget.style.color = '#4a5568'; }}
-                            >
-                              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          <Label className="text-sm font-medium flex items-center gap-1.5"><Lock size={13} /> Contrasena *</Label>
+                          <div className="relative mt-1">
+                            <Input type={showPassword ? 'text' : 'password'} value={form.password}
+                              onChange={e => update('password', e.target.value)} placeholder="Minimo 6 caracteres"
+                              style={{ borderColor: errors.password ? '#e63946' : '#e2e8f0', paddingRight: '40px' }} />
+                            <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2" onClick={() => setShowPassword(!showPassword)} style={{ color: '#94a3b8' }}>
+                              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                           </div>
-                          {errors.password && (
-                            <p className="mt-1 text-xs" style={{ color: '#e63946' }}>{errors.password}</p>
-                          )}
+                          {errors.password && <p className="text-xs mt-1" style={{ color: '#e63946' }}>{errors.password}</p>}
                         </div>
-
-                        {/* Confirm password */}
                         <div>
-                          <Label className="text-sm font-medium" style={{ color: '#1a1a2e' }}>
-                            Confirmar contraseña *
-                          </Label>
-                          <div className="relative mt-1.5">
-                            <Input
-                              type={showConfirm ? 'text' : 'password'}
-                              placeholder="Repite tu contraseña"
-                              value={form.confirmPassword}
-                              onChange={e => updateField('confirmPassword', e.target.value)}
-                              className="pr-10"
-                              style={{
-                                backgroundColor: '#f8f9fa',
-                                borderColor: errors.confirmPassword ? '#e63946' : '#e2e8f0',
-                                fontSize: '0.95rem',
-                                padding: '12px 16px',
-                                paddingRight: '40px',
-                              }}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowConfirm(prev => !prev)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors duration-200"
-                              style={{ color: '#4a5568' }}
-                              onMouseEnter={e => { e.currentTarget.style.color = '#1548a0'; }}
-                              onMouseLeave={e => { e.currentTarget.style.color = '#4a5568'; }}
-                            >
-                              {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                          <Label className="text-sm font-medium">Confirmar *</Label>
+                          <div className="relative mt-1">
+                            <Input type={showConfirm ? 'text' : 'password'} value={form.confirmPassword}
+                              onChange={e => update('confirmPassword', e.target.value)} placeholder="Repite"
+                              style={{ borderColor: errors.confirmPassword ? '#e63946' : '#e2e8f0', paddingRight: '40px' }} />
+                            <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2" onClick={() => setShowConfirm(!showConfirm)} style={{ color: '#94a3b8' }}>
+                              {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                           </div>
-                          {errors.confirmPassword && (
-                            <p className="mt-1 text-xs" style={{ color: '#e63946' }}>{errors.confirmPassword}</p>
-                          )}
-                        </div>
-
-                        {/* Legal note */}
-                        <p
-                          className="text-xs py-2 px-3 rounded"
-                          style={{ color: '#4a5568', backgroundColor: 'rgba(21,72,160,0.04)', lineHeight: 1.4 }}
-                        >
-                          Al registrarte, aceptas que te contactemos por WhatsApp y correo para activar tu cuenta y brindarte soporte.
-                        </p>
-
-                        {/* Terms checkbox */}
-                        <div className="flex items-start gap-3">
-                          <button
-                            type="button"
-                            onClick={() => updateField('acceptTerms', !form.acceptTerms)}
-                            className="mt-0.5 flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200"
-                            style={{
-                              borderColor: errors.acceptTerms ? '#e63946' : form.acceptTerms ? '#2a9d8f' : '#e2e8f0',
-                              backgroundColor: form.acceptTerms ? '#2a9d8f' : 'transparent',
-                            }}
-                          >
-                            {form.acceptTerms && <Check size={12} style={{ color: '#ffffff' }} />}
-                          </button>
-                          <label className="text-sm cursor-pointer" style={{ color: '#4a5568' }}>
-                            Acepto la{' '}
-                            <button type="button" className="underline" style={{ color: '#1548a0' }}>política de privacidad</button>
-                            {' '}y los{' '}
-                            <button type="button" className="underline" style={{ color: '#1548a0' }}>términos de uso</button>
-                            {' '}*
-                          </label>
-                        </div>
-                        {errors.acceptTerms && (
-                          <p className="text-xs" style={{ color: '#e63946' }}>{errors.acceptTerms}</p>
-                        )}
-
-                        {/* Marketing checkbox */}
-                        <div className="flex items-start gap-3">
-                          <button
-                            type="button"
-                            onClick={() => updateField('acceptMarketing', !form.acceptMarketing)}
-                            className="mt-0.5 flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200"
-                            style={{
-                              borderColor: form.acceptMarketing ? '#2a9d8f' : '#e2e8f0',
-                              backgroundColor: form.acceptMarketing ? '#2a9d8f' : 'transparent',
-                            }}
-                          >
-                            {form.acceptMarketing && <Check size={12} style={{ color: '#ffffff' }} />}
-                          </button>
-                          <label className="text-sm cursor-pointer" style={{ color: '#4a5568' }}>
-                            Quiero recibir información técnica y ofertas de ThermaPro
-                          </label>
-                        </div>
-
-                        {/* Submit */}
-                        <Button
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="w-full font-semibold uppercase text-sm transition-all hover:brightness-110 disabled:opacity-70"
-                          style={{
-                            backgroundColor: '#e63946',
-                            color: '#ffffff',
-                            padding: '16px',
-                            borderRadius: '4px',
-                            letterSpacing: '0.05em',
-                          }}
-                        >
-                          {isSubmitting ? (
-                            <span className="flex items-center justify-center gap-2">
-                              <svg
-                                className="animate-spin h-4 w-4"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                              </svg>
-                              CREANDO CUENTA...
-                            </span>
-                          ) : (
-                            <span className="flex items-center justify-center gap-1">
-                              CREAR CUENTA <ArrowRight size={16} />
-                            </span>
-                          )}
-                        </Button>
-
-                        {/* Login link */}
-                        <p className="text-center text-sm" style={{ color: '#4a5568' }}>
-                          ¿Ya tienes cuenta?{' '}
-                          <Link
-                            to="/login"
-                            className="font-semibold transition-all duration-200"
-                            style={{ color: '#e63946' }}
-                            onMouseEnter={e => { e.currentTarget.style.textDecoration = 'underline'; }}
-                            onMouseLeave={e => { e.currentTarget.style.textDecoration = 'none'; }}
-                          >
-                            Inicia sesión aquí &rarr;
-                          </Link>
-                        </p>
-                      </form>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* RIGHT: Benefits Sidebar */}
-              <div ref={sidebarRef} className="lg:col-span-2">
-                <div
-                  className="lg:sticky"
-                  style={{ top: '100px' }}
-                >
-                  <h4
-                    className="font-bold uppercase"
-                    style={{ fontSize: '1rem', color: '#1a1a2e', letterSpacing: '0.05em' }}
-                  >
-                    AL REGISTRARTE OBTIENES:
-                  </h4>
-
-                  <div className="benefits-list mt-5 space-y-4">
-                    {benefits.map((b, i) => (
-                      <div key={i} className="benefit-item flex items-start gap-3">
-                        <Check
-                          size={18}
-                          className="flex-shrink-0 mt-0.5"
-                          style={{ color: '#2a9d8f' }}
-                        />
-                        <div>
-                          <p className="text-sm font-semibold" style={{ color: '#1a1a2e' }}>
-                            {b.title}
-                          </p>
-                          <p className="text-xs mt-0.5" style={{ color: '#4a5568', lineHeight: 1.4 }}>
-                            {b.description}
-                          </p>
+                          {errors.confirmPassword && <p className="text-xs mt-1" style={{ color: '#e63946' }}>{errors.confirmPassword}</p>}
                         </div>
                       </div>
-                    ))}
+
+                      {/* Terms */}
+                      <div>
+                        <label className="flex items-start gap-3 cursor-pointer">
+                          <div className="w-5 h-5 rounded border-2 mt-0.5 flex-shrink-0 flex items-center justify-center transition-all"
+                            style={{ borderColor: form.acceptTerms ? '#1548a0' : errors.acceptTerms ? '#e63946' : '#cbd5e1', backgroundColor: form.acceptTerms ? '#1548a0' : 'transparent' }}
+                            onClick={() => update('acceptTerms', !form.acceptTerms)}>
+                            {form.acceptTerms && <Check size={12} style={{ color: '#fff' }} />}
+                          </div>
+                          <span className="text-sm" style={{ color: '#4a5568' }}>Acepto que NAE me contacte por WhatsApp y correo.</span>
+                        </label>
+                        {errors.acceptTerms && <p className="text-xs mt-1" style={{ color: '#e63946' }}>{errors.acceptTerms}</p>}
+                      </div>
+
+                      {/* Submit */}
+                      <Button type="submit" className="w-full font-bold uppercase text-sm"
+                        style={{ backgroundColor: '#e63946', color: '#fff', padding: '16px', letterSpacing: '0.05em' }}>
+                        CREAR CUENTA <ArrowRight size={16} className="ml-2" />
+                      </Button>
+
+                      <p className="text-center text-sm" style={{ color: '#4a5568' }}>
+                        Ya tienes cuenta? <Link to="/login" className="font-semibold hover:underline" style={{ color: '#e63946' }}>Ingresa aqui</Link>
+                      </p>
+                    </form>
                   </div>
 
-                  {/* Testimonial mini-card */}
-                  <div
-                    className="mt-8 rounded-lg p-5 border"
-                    style={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0' }}
-                  >
-                    <p
-                      className="text-sm italic"
-                      style={{ color: '#4a5568', lineHeight: 1.5 }}
-                    >
-                      "Me registré para ver los precios y terminé convirtiéndome en distribuidor. El soporte técnico es excelente."
-                    </p>
-                    <p className="text-sm font-medium mt-3" style={{ color: '#1a1a2e' }}>
-                      Carlos M., ClimaSoluciones México
-                    </p>
+                  {/* Sidebar */}
+                  <div className="lg:col-span-2">
+                    <div className="sticky top-28 space-y-5">
+                      <div className="p-5 rounded-lg bg-white border border-slate-200">
+                        <h3 className="font-bold uppercase text-sm mb-3" style={{ color: '#1a1a2e' }}>Al registrarte obtienes:</h3>
+                        {['Acceso a precios de distribuidor', 'Calculadora de ahorro energetico', 'Fichas tecnicas descargables', 'Soporte por WhatsApp', 'Leads de clientes en tu zona', 'Capacitacion tecnica gratuita'].map((b, i) => (
+                          <div key={i} className="flex items-start gap-2 text-sm mb-2" style={{ color: '#4a5568' }}>
+                            <Check size={14} style={{ color: '#2a9d8f', marginTop: '3px', flexShrink: 0 }} /> {b}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-3 p-4 rounded-lg bg-white border border-slate-200">
+                        <Shield size={18} style={{ color: '#1548a0', flexShrink: 0 }} />
+                        <p className="text-xs" style={{ color: '#64748b' }}><span className="font-semibold">Sin compromiso.</span> Si en 30 dias no vendes, te devolvemos el 100%.</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
+            </section>
+          </>
+        )}
 
         {/* ═══════════════════════════════════════════
-            SECTION 3: Trust Signals
+            STEP: SUBMITTING (creating account)
             ═══════════════════════════════════════════ */}
-        <section
-          ref={trustRef}
-          style={{
-            backgroundColor: '#ffffff',
-            padding: '4rem 0',
-            borderTop: '1px solid #e2e8f0',
-          }}
-        >
-          <div className="container-tp text-center" style={{ maxWidth: '800px' }}>
-            <p
-              className="font-medium"
-              style={{ fontSize: '1rem', color: '#4a5568' }}
-            >
-              Registro 100% gratuito. Sin compromiso. Sin tarjeta de crédito.
-            </p>
-            <div className="flex justify-center gap-8 mt-8 flex-wrap">
-              <div className="flex items-center gap-2">
-                <Shield size={20} style={{ color: '#2a9d8f' }} />
-                <span className="text-sm font-medium" style={{ color: '#4a5568' }}>Datos protegidos</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Lock size={20} style={{ color: '#2a9d8f' }} />
-                <span className="text-sm font-medium" style={{ color: '#4a5568' }}>Conexión segura SSL</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock size={20} style={{ color: '#2a9d8f' }} />
-                <span className="text-sm font-medium" style={{ color: '#4a5568' }}>Activación en minutos</span>
-              </div>
+        {step === 'submitting' && (
+          <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0f0f12' }}>
+            <div className="text-center">
+              <Loader2 size={48} className="animate-spin mx-auto mb-4" style={{ color: '#1548a0' }} />
+              <h2 className="text-xl font-bold text-white uppercase">Creando tu cuenta...</h2>
+              <p className="mt-2" style={{ color: '#94a3b8' }}>Esto tomara solo unos segundos</p>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* ═══════════════════════════════════════════
-            OTP VERIFICATION MODAL
+            STEP: OTP (enter verification code)
             ═══════════════════════════════════════════ */}
-        {showOtpModal && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
-            onClick={() => !isVerifyingOtp && !isOtpVerified && setShowOtpModal(false)}
-          >
-            <div
-              className="bg-white rounded-lg shadow-2xl w-full max-w-md p-8 relative"
-              onClick={e => e.stopPropagation()}
-            >
-              {isOtpVerified ? (
-                <div className="text-center py-6">
-                  <div
-                    className="w-16 h-16 rounded-full mx-auto flex items-center justify-center"
-                    style={{ backgroundColor: '#ecfdf5' }}
-                  >
-                    <Check size={32} style={{ color: '#2a9d8f' }} />
-                  </div>
-                  <h3 className="font-bold uppercase mt-5 text-lg" style={{ color: '#1a1a2e' }}>
-                    ¡CUENTA VERIFICADA!
-                  </h3>
-                  <p className="mt-3" style={{ color: '#4a5568' }}>
-                    Tu email ha sido confirmado exitosamente.
-                  </p>
-                  <p className="mt-2 text-sm" style={{ color: '#2a9d8f' }}>
-                    Redirigiendo a productos...
-                  </p>
+        {step === 'otp' && (
+          <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0f0f12', padding: '20px' }}>
+            <div className="w-full max-w-md">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-4" style={{ backgroundColor: '#eef2ff' }}>
+                  <Mail size={32} style={{ color: '#1548a0' }} />
                 </div>
-              ) : (
-                <>
-                  <div className="text-center mb-6">
-                    <div
-                      className="w-14 h-14 rounded-full mx-auto flex items-center justify-center mb-4"
-                      style={{ backgroundColor: '#eef2ff' }}
-                    >
-                      <Mail size={28} style={{ color: '#1548a0' }} />
-                    </div>
-                    <h3 className="font-bold uppercase text-lg" style={{ color: '#1a1a2e' }}>
-                      VERIFICA TU CORREO
-                    </h3>
-                    <p className="mt-2 text-sm" style={{ color: '#4a5568' }}>
-                      Hemos enviado un código de 6 dígitos a
-                    </p>
-                    <p className="font-semibold text-sm mt-1" style={{ color: '#1548a0' }}>
-                      {otpEmail}
-                    </p>
+                <h2 className="text-2xl font-bold text-white uppercase">Verifica tu correo</h2>
+                <p className="mt-2" style={{ color: '#94a3b8' }}>Hemos enviado un codigo de 6 digitos a</p>
+                <p className="mt-1 font-semibold" style={{ color: '#1548a0' }}>{form.email}</p>
+              </div>
+
+              <div className="bg-white rounded-lg p-6 shadow-xl">
+                {otpError && (
+                  <div className="mb-4 p-3 rounded flex items-center gap-2" style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#e63946' }}>
+                    <AlertCircle size={14} /> <span className="text-sm">{otpError}</span>
                   </div>
+                )}
 
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-xs font-semibold uppercase text-slate-500">
-                        Código de verificación
-                      </label>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={6}
-                        value={otpCode}
-                        onChange={e => {
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 6);
-                          setOtpCode(val);
-                          setOtpError('');
-                        }}
-                        placeholder="123456"
-                        className="w-full mt-1 border border-slate-200 rounded-md px-4 py-3 text-center text-2xl font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-[#1548a0] focus:border-transparent"
-                        style={{ letterSpacing: '0.3em' }}
-                        disabled={isVerifyingOtp}
-                        autoFocus
-                      />
-                      {otpError && (
-                        <p className="text-xs text-red-500 mt-2">{otpError}</p>
-                      )}
-                    </div>
+                <div>
+                  <Label className="text-xs font-semibold uppercase text-slate-500">Codigo de verificacion</Label>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={e => { setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setOtpError(''); }}
+                    onKeyDown={e => { if (e.key === 'Enter') handleVerifyOtp(); }}
+                    placeholder="------"
+                    className="w-full mt-2 border border-slate-200 rounded-md px-4 py-4 text-center text-3xl font-bold tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-[#1548a0]"
+                    style={{ fontFamily: 'monospace' }}
+                    autoFocus
+                  />
+                  <p className="text-xs text-slate-400 mt-2 text-center">Ingresa los 6 digitos que recibiste</p>
+                </div>
 
-                    <Button
-                      className="w-full font-semibold uppercase text-sm"
-                      style={{
-                        backgroundColor: '#1548a0',
-                        color: '#ffffff',
-                        padding: '14px',
-                        borderRadius: '4px',
-                      }}
-                      onClick={verifyOtp}
-                      disabled={isVerifyingOtp || otpCode.length !== 6}
-                    >
-                      {isVerifyingOtp ? (
-                        <>
-                          <Loader2 size={16} className="animate-spin mr-2" />
-                          VERIFICANDO...
-                        </>
-                      ) : (
-                        'VERIFICAR CÓDIGO'
-                      )}
-                    </Button>
+                <Button className="w-full mt-5 font-bold uppercase" style={{ backgroundColor: otpCode.length === 6 ? '#1548a0' : '#94a3b8', color: '#fff', padding: '14px' }}
+                  onClick={handleVerifyOtp} disabled={otpCode.length !== 6}>
+                  VERIFICAR CODIGO
+                </Button>
 
-                    <div className="text-center">
-                      <button
-                        type="button"
-                        className="text-xs text-slate-500 hover:text-[#1548a0] underline transition-colors"
-                        onClick={resendOtp}
-                        disabled={isVerifyingOtp}
-                      >
-                        ¿No recibiste el código? Reenviar
-                      </button>
-                    </div>
+                <div className="text-center mt-4 space-y-2">
+                  <button type="button" className="text-sm text-slate-500 hover:text-[#1548a0] underline" onClick={handleResendOtp}>No recibiste el codigo? Reenviar</button>
+                  <p className="text-xs text-slate-400">Revisa tambien tu carpeta de spam</p>
+                </div>
+              </div>
 
-                    <div className="text-center pt-2">
-                      <button
-                        type="button"
-                        className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
-                        onClick={() => setShowOtpModal(false)}
-                        disabled={isVerifyingOtp}
-                      >
-                        Verificar más tarde
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
+              <p className="text-center mt-4">
+                <button className="text-xs text-slate-500 hover:text-white underline" onClick={() => setStep('form')}>Volver al formulario</button>
+              </p>
             </div>
-          </div>
+          </section>
+        )}
+
+        {/* ═══════════════════════════════════════════
+            STEP: VERIFYING (checking code)
+            ═══════════════════════════════════════════ */}
+        {step === 'verifying' && (
+          <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0f0f12' }}>
+            <div className="text-center">
+              <Loader2 size={48} className="animate-spin mx-auto mb-4" style={{ color: '#1548a0' }} />
+              <h2 className="text-xl font-bold text-white uppercase">Verificando codigo...</h2>
+            </div>
+          </section>
+        )}
+
+        {/* ═══════════════════════════════════════════
+            STEP: SUCCESS (redirecting)
+            ═══════════════════════════════════════════ */}
+        {step === 'success' && (
+          <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0f0f12' }}>
+            <div className="text-center max-w-md px-4">
+              <div className="w-20 h-20 rounded-full mx-auto flex items-center justify-center mb-6" style={{ backgroundColor: '#ecfdf5' }}>
+                <Check size={40} style={{ color: '#2a9d8f' }} />
+              </div>
+              <h2 className="text-2xl font-bold uppercase" style={{ color: '#2a9d8f' }}>Cuenta verificada!</h2>
+              <p className="mt-4" style={{ color: '#94a3b8' }}>Tu email ha sido confirmado exitosamente.</p>
+              <p className="mt-2" style={{ color: '#64748b' }}>Redirigiendo al catalogo de productos...</p>
+              <Loader2 size={24} className="animate-spin mx-auto mt-6" style={{ color: '#1548a0' }} />
+            </div>
+          </section>
         )}
       </div>
     </Layout>

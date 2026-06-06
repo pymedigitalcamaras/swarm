@@ -3,14 +3,13 @@ import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import {
   ArrowRight, Eye, EyeOff, Check, Shield, Lock,
-  Loader2, Mail, User, Phone, MapPin, Building2, AlertCircle, MessageCircle
+  Loader2, Mail, User, Phone, MapPin, Building2, AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Layout from '@/components/Layout';
 import { supabase } from '@/lib/supabase';
-import { generateVerificationCode, getWhatsAppLink, verifyCode } from '@/lib/verification';
 
 interface RegisterForm {
   fullName: string;
@@ -37,7 +36,7 @@ const USER_TYPE_PRICES: Record<string, string> = {
   distribuidor_acs: 'Veras precios de distribuidor',
 };
 
-type Step = 'form' | 'creating' | 'verify_whatsapp' | 'success';
+type Step = 'form' | 'creating' | 'success';
 
 export default function Registro() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -53,10 +52,6 @@ export default function Registro() {
 
   const [step, setStep] = useState<Step>('form');
   const [globalError, setGlobalError] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [inputCode, setInputCode] = useState('');
-  const [codeError, setCodeError] = useState('');
-  const [userId, setUserId] = useState('');
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -89,14 +84,13 @@ export default function Registro() {
     return Object.keys(e).length === 0;
   };
 
-  // STEP 1: Create account
   const handleCreateAccount = async () => {
     if (!validate()) return;
     setStep('creating');
     setGlobalError('');
 
     try {
-      // 1. Create auth user
+      // 1. Create auth user (no email confirmation - auto-confirmed)
       const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
         email: form.email.trim(),
         password: form.password,
@@ -115,7 +109,6 @@ export default function Registro() {
       }
 
       const uid = signUpData.user.id;
-      setUserId(uid);
 
       // 2. Create profile
       try {
@@ -138,39 +131,17 @@ export default function Registro() {
         password: form.password,
       });
 
-      // 4. Generate verification code
-      const code = await generateVerificationCode(uid);
-      setVerificationCode(code);
-
-      // 5. Show WhatsApp verification screen
-      setStep('verify_whatsapp');
+      // 4. Success
+      setStep('success');
+      setTimeout(() => {
+        window.location.href = '/#/productos';
+      }, 2500);
 
     } catch (err: any) {
       setGlobalError(err?.message || 'Error inesperado');
       setStep('form');
     }
   };
-
-  // STEP 2: Verify code manually
-  const handleVerifyManual = async () => {
-    if (!inputCode || inputCode.length !== 6) {
-      setCodeError('Ingresa los 6 digitos');
-      return;
-    }
-
-    const success = await verifyCode(userId, inputCode);
-    if (success) {
-      setStep('success');
-      setTimeout(() => {
-        window.location.href = '/#/productos';
-      }, 2000);
-    } else {
-      setCodeError('Codigo incorrecto');
-    }
-  };
-
-  // WhatsApp link
-  const whatsappLink = getWhatsAppLink(verificationCode, form.fullName);
 
   return (
     <Layout>
@@ -187,7 +158,7 @@ export default function Registro() {
                 <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 3rem)', fontWeight: 900, color: '#fff', lineHeight: 1.1, marginTop: '16px' }}>
                   ACCEDE A PRECIOS Y<br />HERRAMIENTAS EXCLUSIVAS
                 </h1>
-                <p style={{ color: '#94a3b8', marginTop: '12px', fontSize: '1rem' }}>Registrate gratis y verifica tu cuenta por WhatsApp.</p>
+                <p style={{ color: '#94a3b8', marginTop: '12px', fontSize: '1rem' }}>Registrate gratis. Acceso inmediato.</p>
               </div>
             </section>
 
@@ -357,86 +328,6 @@ export default function Registro() {
           </section>
         )}
 
-        {/* STEP: VERIFY WHATSAPP */}
-        {step === 'verify_whatsapp' && (
-          <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0f0f12', padding: '20px' }}>
-            <div className="w-full max-w-md">
-              <div className="text-center mb-6">
-                <div className="w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-4" style={{ backgroundColor: '#ecfdf5' }}>
-                  <MessageCircle size={32} style={{ color: '#25D366' }} />
-                </div>
-                <h2 className="text-2xl font-bold text-white uppercase">Verifica tu cuenta</h2>
-                <p className="mt-2" style={{ color: '#94a3b8' }}>Envia tu codigo por WhatsApp para activar tu cuenta</p>
-              </div>
-
-              <div className="bg-white rounded-lg p-6 shadow-xl space-y-5">
-
-                {/* Code display */}
-                <div className="text-center p-4 rounded-lg" style={{ backgroundColor: '#f0f9ff', border: '2px dashed #022067' }}>
-                  <p className="text-xs uppercase font-semibold text-slate-500 mb-2">Tu codigo de verificacion</p>
-                  <p className="text-4xl font-bold tracking-[0.3em]" style={{ color: '#022067', fontFamily: 'monospace' }}>{verificationCode}</p>
-                </div>
-
-                {/* WhatsApp button */}
-                <a
-                  href={whatsappLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-4 rounded-lg font-bold text-white text-sm uppercase"
-                  style={{ backgroundColor: '#25D366', letterSpacing: '0.05em' }}
-                >
-                  <MessageCircle size={20} />
-                  Enviar codigo por WhatsApp
-                </a>
-
-                <p className="text-xs text-center text-slate-500">
-                  Al hacer clic se abrira WhatsApp con el mensaje pre-llenado. Solo tienes que enviarlo.
-                </p>
-
-                {/* Divider */}
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 h-px bg-slate-200" />
-                  <span className="text-xs text-slate-400">o ingresa el codigo aqui</span>
-                  <div className="flex-1 h-px bg-slate-200" />
-                </div>
-
-                {/* Manual verification */}
-                <div>
-                  <Label className="text-xs font-semibold uppercase text-slate-500">Codigo de verificacion</Label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={inputCode}
-                    onChange={e => { setInputCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setCodeError(''); }}
-                    onKeyDown={e => { if (e.key === 'Enter') handleVerifyManual(); }}
-                    placeholder="------"
-                    className="w-full mt-2 border border-slate-200 rounded-md px-4 py-3 text-center text-2xl font-bold tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-[#022067]"
-                    style={{ fontFamily: 'monospace' }}
-                  />
-                  {codeError && <p className="text-xs mt-1 text-center" style={{ color: '#e63946' }}>{codeError}</p>}
-                </div>
-
-                <Button
-                  className="w-full font-bold uppercase"
-                  style={{ backgroundColor: inputCode.length === 6 ? '#022067' : '#94a3b8', color: '#fff' }}
-                  onClick={handleVerifyManual}
-                  disabled={inputCode.length !== 6}
-                >
-                  VERIFICAR CODIGO
-                </Button>
-
-              </div>
-
-              <p className="text-center mt-4">
-                <button className="text-xs text-slate-500 hover:text-white underline" onClick={() => setStep('form')}>
-                  Volver al formulario
-                </button>
-              </p>
-            </div>
-          </section>
-        )}
-
         {/* STEP: SUCCESS */}
         {step === 'success' && (
           <section className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0f0f12' }}>
@@ -444,9 +335,9 @@ export default function Registro() {
               <div className="w-20 h-20 rounded-full mx-auto flex items-center justify-center mb-6" style={{ backgroundColor: '#ecfdf5' }}>
                 <Check size={40} style={{ color: '#2a9d8f' }} />
               </div>
-              <h2 className="text-2xl font-bold uppercase" style={{ color: '#2a9d8f' }}>Cuenta verificada!</h2>
-              <p className="mt-4" style={{ color: '#94a3b8' }}>Tu cuenta ha sido activada exitosamente.</p>
-              <p className="mt-2" style={{ color: '#64748b' }}>Redirigiendo al catalogo de productos...</p>
+              <h2 className="text-2xl font-bold uppercase" style={{ color: '#2a9d8f' }}>Cuenta creada!</h2>
+              <p className="mt-4" style={{ color: '#94a3b8' }}>Bienvenido a NAE. Ya tienes acceso a precios de distribuidor.</p>
+              <p className="mt-2" style={{ color: '#64748b' }}>Redirigiendo al catalogo...</p>
               <Loader2 size={24} className="animate-spin mx-auto mt-6" style={{ color: '#022067' }} />
             </div>
           </section>

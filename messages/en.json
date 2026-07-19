@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "title": "New Age Energy - Heat Pumps",
+    "description": "Energy that transforms, comfort that lasts. Factory direct from China to Latin America."
+  },
+  "nav": {
+    "products": "Products",
+    "calculator": "Calculator",
+    "why": "Why NAE?",
+    "tech": "Technical Area",
+    "contact": "Contact",
+    "login": "System Login"
+  },
+  "hero": {
+    "title": "Energy that transforms, comfort that lasts",
+    "subtitle": "Factory direct from China to Latin America",
+    "cta_primary": "Quote your project",
+    "cta_secondary": "See our products",
+    "badge_installers": "More than 500,000 installers in Latin America",
+    "badge_solar": "Designed for photovoltaic solar integration"
+  },
+  "calculator": {
+    "title": "Project Calculator",
+    "m2": "Square meters to climate",
+    "liters": "Daily hot water liters",
+    "building_type": "Building type",
+    "house": "House",
+    "apartment": "Apartment",
+    "building": "Building",
+    "commercial": "Commercial",
+    "country": "Country",
+    "solar_checkbox": "Do you have or plan to install photovoltaic panels?",
+    "submit": "Calculate",
+    "result_recommendation": "Recommendation",
+    "result_savings": "Estimated savings",
+    "result_autonomy": "Energy autonomy",
+    "form_name": "Name",
+    "form_company": "Company",
+    "form_email": "Email",
+    "form_phone": "Phone",
+    "form_whatsapp": "WhatsApp",
+    "form_project_type": "Project type",
+    "form_submit": "Request quote"
+  },
+  "catalog": {
+    "title": "Product Catalog",
+    "filter_type": "Type",
+    "filter_capacity": "Capacity (kW)",
+    "filter_application": "Application",
+    "acs": "DHW",
+    "clima": "HVAC",
+    "pool": "Pool",
+    "residential": "Residential",
+    "commercial": "Commercial",
+    "industrial": "Industrial",
+    "solar_section": "Solar integration",
+    "quote_button": "Request quote"
+  },
+  "why": {
+    "title": "Why NAE?",
+    "savings": "Energy savings",
+    "co2": "CO₂ reduction",
+    "inverter": "Inverter technology",
+    "support": "Complete technical support",
+    "comparison_title": "Technology comparison",
+    "testimonials": "Installer testimonials",
+    "coverage": "Coverage in Latin America and US Latino"
+  },
+  "tech_area": {
+    "title": "Unified Technical Area",
+    "subtitle": "We don't just sell equipment, we accompany you",
+    "tools": "Tools for registered distributors",
+    "budget": "Smart budgeter",
+    "brain": "HRF digital brain",
+    "crm": "Tracking CRM",
+    "support": "Step-by-step installation support",
+    "cta": "Register as distributor"
+  },
+  "footer": {
+    "products": "Products",
+    "calculator": "Calculator",
+    "why": "Why NAE?",
+    "tech": "Technical Area",
+    "contact": "Contact",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "address": "China Address",
+    "newsletter": "Newsletter",
+    "subscribe": "Subscribe"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "send": "Send",
+    "close": "Close"
+  }
+}

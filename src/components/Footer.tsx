@@ -1,174 +1,55 @@
-import { Link } from 'react-router-dom';
-import { Linkedin, Youtube, Instagram } from 'lucide-react';
-
-const productLinks = [
-  { label: 'Aerotermia Residencial', path: '/productos' },
-  { label: 'Geotermia Industrial', path: '/productos' },
-  { label: 'ACS (Agua Caliente)', path: '/productos' },
-  { label: 'Piscinas', path: '/productos' },
-  { label: 'Accesorios', path: '/productos' },
-];
-
-const companyLinks = [
-  { label: 'Nosotros', path: '/nosotros' },
-  { label: 'Casos de Exito', path: '/casos' },
-  { label: 'Blog / Recursos', path: '/nosotros' },
-  { label: 'Contacto', path: '/contacto' },
-];
-
-const distributorLinks = [
-  { label: 'Programa de Distribuidores', path: '/distribuidor' },
-  { label: 'Registrarse', path: '/registro' },
-  { label: 'Portal de Partners', path: '/login' },
-  { label: 'Soporte Tecnico', path: '/contacto' },
-];
+import {useTranslations} from 'next-intl';
+import {Link} from '@/i18n/routing';
 
 export default function Footer() {
+  const t = useTranslations('footer');
+
   return (
-    <footer style={{ backgroundColor: '#0f0f12' }}>
-      <div className="container-tp" style={{ paddingTop: '4rem', paddingBottom: '2rem' }}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
-          {/* Col 1: Brand */}
+    <footer className="w-full border-t border-gray-200 bg-[#1E3A5F] text-white">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <Link to="/" className="text-white font-extrabold text-2xl uppercase tracking-tight">
-              THERMAPRO
-            </Link>
-            <p className="mt-3 text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              Tecnologia termica para Latinoamerica
-            </p>
-            <div className="flex items-center gap-4 mt-6">
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors duration-200"
-                style={{ color: 'rgba(255,255,255,0.5)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
-              >
-                <Linkedin size={20} />
-              </a>
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors duration-200"
-                style={{ color: 'rgba(255,255,255,0.5)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
-              >
-                <Youtube size={20} />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="transition-colors duration-200"
-                style={{ color: 'rgba(255,255,255,0.5)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
-              >
-                <Instagram size={20} />
-              </a>
-            </div>
+            <h3 className="mb-4 text-lg font-bold">NAE</h3>
+            <p className="text-sm text-gray-300">New Age Energy</p>
+            <p className="mt-2 text-sm text-gray-300">Energía que transforma, confort que perdura</p>
           </div>
 
-          {/* Col 2: Products */}
           <div>
-            <h4 className="text-white font-semibold text-sm uppercase mb-4" style={{ letterSpacing: '0.08em' }}>
-              PRODUCTOS
-            </h4>
-            <ul className="space-y-3">
-              {productLinks.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    to={link.path}
-                    className="text-sm transition-colors duration-200 link-underline"
-                    style={{ color: 'rgba(255,255,255,0.5)' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">Links</h3>
+            <ul className="space-y-2">
+              <li><Link href="/catalogo" className="text-sm text-gray-300 hover:text-white">{t('products')}</Link></li>
+              <li><Link href="/calculadora" className="text-sm text-gray-300 hover:text-white">{t('calculator')}</Link></li>
+              <li><Link href="/por-que-nae" className="text-sm text-gray-300 hover:text-white">{t('why')}</Link></li>
+              <li><Link href="/area-tecnica" className="text-sm text-gray-300 hover:text-white">{t('tech')}</Link></li>
             </ul>
           </div>
 
-          {/* Col 3: Company */}
           <div>
-            <h4 className="text-white font-semibold text-sm uppercase mb-4" style={{ letterSpacing: '0.08em' }}>
-              COMPANIA
-            </h4>
-            <ul className="space-y-3">
-              {companyLinks.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    to={link.path}
-                    className="text-sm transition-colors duration-200 link-underline"
-                    style={{ color: 'rgba(255,255,255,0.5)' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">{t('contact')}</h3>
+            <ul className="space-y-2 text-sm text-gray-300">
+              <li>info@nae-energy.com</li>
+              <li>WhatsApp: +86 xxx xxxx xxxx</li>
+              <li>China Factory Address</li>
             </ul>
           </div>
 
-          {/* Col 4: Distributors */}
           <div>
-            <h4 className="text-white font-semibold text-sm uppercase mb-4" style={{ letterSpacing: '0.08em' }}>
-              DISTRIBUIDORES
-            </h4>
-            <ul className="space-y-3">
-              {distributorLinks.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    to={link.path}
-                    className="text-sm transition-colors duration-200 link-underline"
-                    style={{ color: 'rgba(255,255,255,0.5)' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = '#fff'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider">{t('newsletter')}</h3>
+            <form className="flex gap-2">
+              <input
+                type="email"
+                placeholder="Email"
+                className="flex-1 rounded-lg bg-white/10 px-3 py-2 text-sm text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-white/30"
+              />
+              <button type="submit" className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-[#1E3A5F] hover:bg-gray-100">
+                {t('subscribe')}
+              </button>
+            </form>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div
-          className="mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
-          style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}
-        >
-          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            &copy; 2025 ThermaPro. Todos los derechos reservados.
-          </p>
-          <div className="flex items-center gap-4">
-            <Link
-              to="/"
-              className="text-xs transition-colors duration-200"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; }}
-            >
-              Politica de Privacidad
-            </Link>
-            <span style={{ color: 'rgba(255,255,255,0.2)' }}>&middot;</span>
-            <Link
-              to="/"
-              className="text-xs transition-colors duration-200"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.4)'; }}
-            >
-              Terminos de Uso
-            </Link>
-          </div>
+        <div className="mt-8 border-t border-white/10 pt-8 text-center text-sm text-gray-400">
+          © {new Date().getFullYear()} New Age Energy. All rights reserved.
         </div>
       </div>
     </footer>

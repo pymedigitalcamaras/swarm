@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "title": "New Age Energy - Bombas de Calor",
+    "description": "Energia que transforma, conforto que perdura. Fábrica direta da China para América Latina."
+  },
+  "nav": {
+    "products": "Produtos",
+    "calculator": "Calculadora",
+    "why": "Por que NAE?",
+    "tech": "Área Técnica",
+    "contact": "Contato",
+    "login": "Acessar Sistema"
+  },
+  "hero": {
+    "title": "Energia que transforma, conforto que perdura",
+    "subtitle": "Fábrica direta da China para América Latina",
+    "cta_primary": "Cotar seu projeto",
+    "cta_secondary": "Conheça nossos produtos",
+    "badge_installers": "Mais de 500.000 instaladores na América Latina",
+    "badge_solar": "Projetado para integração com energia solar fotovoltaica"
+  },
+  "calculator": {
+    "title": "Calculadora de Projeto",
+    "m2": "Metros quadrados para climatizar",
+    "liters": "Litros de água quente diários",
+    "building_type": "Tipo de edifício",
+    "house": "Casa",
+    "apartment": "Apartamento",
+    "building": "Edifício",
+    "commercial": "Comercial",
+    "country": "País",
+    "solar_checkbox": "Tem ou planeja instalar painéis fotovoltaicos?",
+    "submit": "Calcular",
+    "result_recommendation": "Recomendação",
+    "result_savings": "Economia estimada",
+    "result_autonomy": "Autonomia energética",
+    "form_name": "Nome",
+    "form_company": "Empresa",
+    "form_email": "Email",
+    "form_phone": "Telefone",
+    "form_whatsapp": "WhatsApp",
+    "form_project_type": "Tipo de projeto",
+    "form_submit": "Solicitar cotação"
+  },
+  "catalog": {
+    "title": "Catálogo de Produtos",
+    "filter_type": "Tipo",
+    "filter_capacity": "Capacidade (kW)",
+    "filter_application": "Aplicação",
+    "acs": "AQS",
+    "clima": "Climatização",
+    "pool": "Piscina",
+    "residential": "Residencial",
+    "commercial": "Comercial",
+    "industrial": "Industrial",
+    "solar_section": "Integração solar",
+    "quote_button": "Solicitar cotação"
+  },
+  "why": {
+    "title": "Por que NAE?",
+    "savings": "Economia de energia",
+    "co2": "Redução de CO₂",
+    "inverter": "Tecnologia Inverter",
+    "support": "Suporte técnico completo",
+    "comparison_title": "Comparativa de tecnologias",
+    "testimonials": "Depoimentos de instaladores",
+    "coverage": "Cobertura na América Latina e EUA Latino"
+  },
+  "tech_area": {
+    "title": "Área Técnica Unificada",
+    "subtitle": "Não vendemos apenas equipamentos, acompanhamos você",
+    "tools": "Ferramentas para redistribuidores registrados",
+    "budget": "Orçamentador inteligente",
+    "brain": "Cérebro digital HRF",
+    "crm": "CRM de acompanhamento",
+    "support": "Suporte de instalação passo a passo",
+    "cta": "Registre-se como redistribuidor"
+  },
+  "footer": {
+    "products": "Produtos",
+    "calculator": "Calculadora",
+    "why": "Por que NAE?",
+    "tech": "Área Técnica",
+    "contact": "Contato",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "address": "Endereço China",
+    "newsletter": "Newsletter",
+    "subscribe": "Inscrever-se"
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "send": "Enviar",
+    "close": "Fechar"
+  }
+}

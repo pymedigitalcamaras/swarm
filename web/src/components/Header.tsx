@@ -4,10 +4,12 @@ import {useTranslations} from 'next-intl';
 import {Link} from '@/i18n/routing';
 import {useLocale} from 'next-intl';
 import Image from 'next/image';
+import {useAuth} from '@/components/auth/AuthContext';
 
 export default function Header() {
   const t = useTranslations('nav');
   const locale = useLocale();
+  const {isAuthenticated, isAdmin} = useAuth();
 
   const locales = [
     {code: 'es', label: 'ES'},
@@ -49,6 +51,11 @@ export default function Header() {
           <Link href="/contacto" className="text-sm font-medium text-white/90 hover:text-white transition">
             {t('contact')}
           </Link>
+          {isAdmin && (
+            <Link href="/admin" className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-bold text-[#1E3A5F] hover:bg-amber-400 transition">
+              ADMIN
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-3">
@@ -64,12 +71,21 @@ export default function Header() {
               </Link>
             ))}
           </div>
-          <a
-            href="/app/login"
-            className="rounded-lg bg-white px-4 py-2 text-sm font-bold text-[#1E3A5F] hover:bg-gray-100 transition"
-          >
-            {t('login')}
-          </a>
+          {isAuthenticated ? (
+            <Link
+              href="/admin"
+              className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-bold text-[#1E3A5F] hover:bg-amber-400 transition"
+            >
+              Panel
+            </Link>
+          ) : (
+            <a
+              href="/admin/login"
+              className="rounded-lg bg-white px-4 py-2 text-sm font-bold text-[#1E3A5F] hover:bg-gray-100 transition"
+            >
+              {t('login')}
+            </a>
+          )}
         </div>
       </div>
     </header>

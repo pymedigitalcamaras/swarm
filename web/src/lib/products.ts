@@ -10,7 +10,9 @@ export const products = [
     temp: '60°C',
     daily: '5.000 litros/día',
     application: 'residential',
-    image: '/5P.jpg'
+    image: '/images/products/5P.jpg',
+    solarCompatible: true,
+    description: 'Bomba de calor para agua caliente sanitaria. Ideal para hogares de 3-4 personas.'
   },
   {
     id: 2,
@@ -23,7 +25,9 @@ export const products = [
     temp: '60°C',
     daily: '5.000 litros/día',
     application: 'residential',
-    image: '/5P.jpg'
+    image: '/images/products/5P.jpg',
+    solarCompatible: true,
+    description: 'Mayor capacidad para hogares grandes o comercios pequeños.'
   },
   {
     id: 3,
@@ -36,7 +40,9 @@ export const products = [
     temp: '60°C',
     daily: '10.000 litros/día',
     application: 'commercial',
-    image: '/10P-1.jpg'
+    image: '/images/products/14.jpg',
+    solarCompatible: true,
+    description: 'Sistema comercial de alta capacidad para hoteles y edificios.'
   },
   {
     id: 4,
@@ -49,7 +55,9 @@ export const products = [
     temp: '60°C',
     daily: '10.000 litros/día',
     application: 'commercial',
-    image: '/10P-1.jpg'
+    image: '/images/products/14.jpg',
+    solarCompatible: true,
+    description: 'Máxima capacidad para grandes demandas de agua caliente.'
   },
   {
     id: 5,
@@ -62,7 +70,9 @@ export const products = [
     temp: '60°C',
     daily: '10.000 litros/día',
     application: 'commercial',
-    image: '/14.jpg'
+    image: '/images/products/14.jpg',
+    solarCompatible: true,
+    description: 'Diseño vertical para espacios reducidos en azoteas.'
   },
   {
     id: 6,
@@ -75,7 +85,9 @@ export const products = [
     temp: '60°C',
     daily: '10.000 litros/día',
     application: 'commercial',
-    image: '/14.jpg'
+    image: '/images/products/14.jpg',
+    solarCompatible: true,
+    description: 'Alta capacidad en formato vertical para instalaciones comerciales.'
   },
   {
     id: 7,
@@ -88,7 +100,9 @@ export const products = [
     temp: '28°C',
     volume: '32 m³',
     application: 'residential',
-    image: '/3.png'
+    image: '/images/products/3.png',
+    solarCompatible: true,
+    description: 'Mantenimiento de temperatura ideal para piscinas residenciales.'
   },
   {
     id: 8,
@@ -101,7 +115,9 @@ export const products = [
     temp: '28°C',
     volume: '72 m³',
     application: 'commercial',
-    image: '/3.png'
+    image: '/images/products/3.png',
+    solarCompatible: true,
+    description: 'Climatización de piscinas comerciales y olímpicas.'
   },
   {
     id: 9,
@@ -114,7 +130,9 @@ export const products = [
     buffer: '60L',
     pump: 'Wilo PUN-201',
     application: 'residential',
-    image: '/5P.jpg'
+    image: '/images/products/5P.jpg',
+    solarCompatible: true,
+    description: 'Calefacción y refrigeración para hogares medianos.'
   },
   {
     id: 10,
@@ -127,7 +145,9 @@ export const products = [
     buffer: '120L',
     pump: 'Wilo PUN-601',
     application: 'residential',
-    image: '/5P.jpg'
+    image: '/images/products/5P.jpg',
+    solarCompatible: true,
+    description: 'Sistema completo para casas grandes con suelo radiante.'
   },
   {
     id: 11,
@@ -140,7 +160,9 @@ export const products = [
     buffer: '150L',
     pump: 'Wilo PUN-750',
     application: 'residential',
-    image: '/5P.jpg'
+    image: '/images/products/5P.jpg',
+    solarCompatible: true,
+    description: 'Máximo confort para grandes superficies residenciales.'
   },
   {
     id: 12,
@@ -152,7 +174,9 @@ export const products = [
     format: 'Monoblock',
     controller: 'SPRSUN',
     application: 'industrial',
-    image: '/10P-1.jpg'
+    image: '/images/products/14.jpg',
+    solarCompatible: true,
+    description: 'Unidad monoblock de alta capacidad para aplicaciones industriales.'
   },
   {
     id: 13,
@@ -164,7 +188,9 @@ export const products = [
     controller: 'Touchscreen',
     modes: 'Hot water/Heating/Cooling',
     application: 'industrial',
-    image: '/10P-1.jpg'
+    image: '/images/products/maquina-psl-700.jpg',
+    solarCompatible: true,
+    description: 'Tecnología inverter R290 para máxima eficiencia energética.'
   },
   {
     id: 14,
@@ -176,7 +202,9 @@ export const products = [
     controller: 'Touchscreen',
     modes: 'Hot water/Heating/Cooling',
     application: 'industrial',
-    image: '/14.jpg'
+    image: '/images/products/14.jpg',
+    solarCompatible: true,
+    description: 'Potencia industrial de 100kW con control táctil avanzado.'
   },
   {
     id: 15,
@@ -188,7 +216,9 @@ export const products = [
     controller: 'Touchscreen',
     modes: 'Hot water/Heating/Cooling',
     application: 'industrial',
-    image: '/14.jpg'
+    image: '/images/products/maquina-psl-700.jpg',
+    solarCompatible: true,
+    description: 'Sistema versátil R32 para climatización integral de grandes espacios.'
   },
   {
     id: 16,
@@ -199,7 +229,9 @@ export const products = [
     assembly: 'Para armar',
     volume: '1-10 m³',
     application: 'residential',
-    image: '/estanque.jpg'
+    image: '/images/products/1.png',
+    solarCompatible: false,
+    description: 'Estanque modular en acero inoxidable para almacenamiento de agua caliente.'
   },
   {
     id: 17,
@@ -210,12 +242,14 @@ export const products = [
     assembly: 'Armado',
     volume: '1-10 m³',
     application: 'residential',
-    image: '/estanque.jpg'
+    image: '/images/products/1.png',
+    solarCompatible: false,
+    description: 'Estanque cilíndrico de fácil instalación para sistemas ACS.'
   }
 ];
 
 export const typeLabels: Record<string, string> = {
-  acs: 'ACS',
+  acs: 'Agua Caliente Sanitaria',
   clima: 'Climatización',
   pool: 'Piscina'
 };

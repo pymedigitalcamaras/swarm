@@ -1,23 +1,24 @@
 {
   "diary": {
-    "count": 92,
-    "last_ts": "2026-07-19T03:47:24.533650",
-    "last_day": 2,
+    "count": 93,
+    "last_ts": "2026-07-20T03:39:45.226013",
+    "last_day": 47,
     "last_sessions": 2,
     "last_messages": 36,
     "last_filename": "day2-2026-06-05-me_olvide_del_create.md",
     "last_latency_s": 23.2,
-    "last_skip": "no_sessions_today"
+    "last_skip": "no_sessions_today",
+    "last_error": "'text'"
   },
   "compact": {
-    "count": 57,
-    "last_ts": "2026-07-04T03:53:26.444918",
+    "count": 58,
+    "last_ts": "2026-07-20T03:41:23.829223",
     "last_invoke": 3,
     "last_sessions": 3,
     "last_messages": 22,
     "last_latency_s": 17.2,
     "last_model": "k2p6",
-    "last_error": "Expecting ',' delimiter: line 2 column 154 (char 155)",
+    "last_error": "'text'",
     "last_skip": "stm_hash_unchanged"
   },
   "stm": {

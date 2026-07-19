@@ -6,6 +6,7 @@ import {Inter} from 'next/font/google';
 import '../globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import {AuthProvider} from '@/components/auth/AuthContext';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -31,11 +32,13 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={inter.variable}>
       <body className={`${inter.className} min-h-screen bg-white text-gray-900 antialiased`}>
-        <NextIntlClientProvider messages={messages}>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-        </NextIntlClientProvider>
+        <AuthProvider>
+          <NextIntlClientProvider messages={messages}>
+            <Header />
+            <main>{children}</main>
+            <Footer />
+          </NextIntlClientProvider>
+        </AuthProvider>
       </body>
     </html>
   );
